@@ -1,0 +1,145 @@
+<%- include('../partials/header') %>
+    <%- include('../partials/sidebar') %>
+
+        <div class="mb-4">
+            <h4 class="mb-0">Examination Results</h4>
+            <small class="text-muted">Select a batch to enter marks or generate marksheets.</small>
+        </div>
+
+        <!-- Filter -->
+        <div class="card border-0 shadow-sm mb-4 bg-light">
+            <div class="card-body">
+                <form action="/admin/results" method="GET" class="row align-items-end">
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label fw-bold">Session *</label>
+                        <select name="session_id" class="form-select" required>
+                            <option value="">Select...</option>
+                            <% sessions.forEach(s=> { %><option value="<%= s.id %>" <%=filters.session_id==s.id
+                                    ? 'selected' : '' %>><%= s.session_name %>
+                                </option>
+                                <% }) %>
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold">Course *</label>
+                        <select name="course_id" id="courseSelect" class="form-select" required
+                            onchange="filterSemesters()">
+                            <option value="">Select...</option>
+                            <% courses.forEach(c=> { %><option value="<%= c.id %>" <%=filters.course_id==c.id
+                                    ? 'selected' : '' %>><%= c.course_name %>
+                                </option>
+                                <% }) %>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label fw-bold">Semester *</label>
+                        <select name="semester_id" id="semesterSelect" class="form-select" required>
+                            <option value="">Select...</option>
+                            <% semesters.forEach(s=> { %><option value="<%= s.id %>" data-course="<%= s.course_id %>"
+                                    <%=filters.semester_id==s.id ? 'selected' : '' %>><%= s.semester_name %>
+                                </option>
+                                <% }) %>
+                        </select>
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search"></i> Load
+                            Batch</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Student List -->
+        <% if (filters.session_id) { %>
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <% if (filters.success) { %>
+                        <div class="alert alert-success py-2"><i class="bi bi-check-circle"></i> Marks saved
+                            successfully!</div>
+                        <% } %>
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Adm No.</th>
+                                        <th>Student Name</th>
+                                        <th>Result Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% if(students.length===0) { %>
+                                        <tr>
+                                            <td colspan="4" class="text-center text-muted">No students found in this
+                                                batch.</td>
+                                        </tr>
+                                        <% } %>
+                                            <% students.forEach(s=> {
+                                                // Check if a result already exists in the Left Join array
+                                                const result = s.Results && s.Results.length > 0 ? s.Results[0] : null;
+                                                %>
+                                                <tr>
+                                                    <td class="fw-bold">
+                                                        <%= s.admission_no %>
+                                                    </td>
+                                                    <td>
+                                                        <%= s.first_name %>
+                                                            <%= s.last_name %>
+                                                    </td>
+                                                    <td>
+                                                        <% if (result) { %>
+                                                            <span
+                                                                class="badge <%= result.result_status === 'PASS' ? 'bg-success' : 'bg-danger' %>">
+                                                                <%= result.result_status %>
+                                                            </span>
+                                                            <small class="text-muted ms-2">
+                                                                <%= result.percentage %>%
+                                                            </small>
+                                                            <% } else { %>
+                                                                <span class="badge bg-secondary">Pending</span>
+                                                                <% } %>
+                                                    </td>
+                                                    <td>
+                                                        <!-- Existing Enter / Edit Marks Button -->
+                                                        <a href="/admin/results/entry/<%= s.id %>"
+                                                            class="btn btn-sm btn-outline-primary fw-bold">
+                                                            <i class="bi bi-pencil-square"></i>
+                                                            <%= result ? 'Edit Marks' : 'Enter Marks' %>
+                                                        </a>
+
+                                                        <% if (result) { %>
+                                                            <!-- Existing Print Semester Marksheet Button -->
+                                                            <a href="/admin/results/marksheet/<%= s.id %>/<%= filters.semester_id %>"
+                                                                target="_blank"
+                                                                class="btn btn-sm btn-success fw-bold ms-2">
+                                                                <i class="bi bi-printer"></i> Print Marksheet
+                                                            </a>
+                                                            <% } %>
+
+                                                                <!-- ADD THIS: Final Course Completion Certificate Button -->
+                                                                <a href="/admin/results/completion-certificate/<%= s.id %>"
+                                                                    target="_blank"
+                                                                    class="btn btn-sm btn-dark fw-bold ms-2">
+                                                                    <i class="bi bi-award"></i> Completion Certificate
+                                                                </a>
+                                                    </td>
+                                                </tr>
+                                                <% }) %>
+                                </tbody>
+                            </table>
+                </div>
+            </div>
+            <% } %>
+
+                <script>
+                    function filterSemesters() {
+                        const courseId = document.getElementById('courseSelect').value;
+                        const semSelect = document.getElementById('semesterSelect');
+                        const options = semSelect.querySelectorAll('option');
+                        semSelect.value = '';
+                        options.forEach(opt => {
+                            if (opt.value === "") return;
+                            if (opt.getAttribute('data-course') === courseId) { opt.style.display = 'block'; } else { opt.style.display = 'none'; }
+                        });
+                    }
+                </script>
+                <%- include('../partials/footer') %>

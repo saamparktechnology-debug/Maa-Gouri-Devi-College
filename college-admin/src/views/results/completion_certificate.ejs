@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Completion Certificate - <%= student.admission_no %>
+    </title>
+
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 0;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Times New Roman", Georgia, serif;
+            background: #dfe3e8;
+            color: #172033;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        /* ==============================
+            PAGE (Landscape A4)
+        ============================== */
+
+        .certificate {
+            width: 297mm;
+            min-height: 210mm;
+            margin: 15px auto;
+            padding: 10mm 15mm;
+            position: relative;
+            overflow: hidden;
+
+            background:
+                radial-gradient(circle at 50% 40%,
+                    rgba(30, 58, 138, 0.025),
+                    transparent 45%),
+                #fff;
+
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.25);
+            border: 1px solid #b18a3d;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Elegant inner certificate borders */
+        .certificate::before {
+            content: "";
+            position: absolute;
+            inset: 4mm;
+            border: 2px solid #173b7a;
+            pointer-events: none;
+        }
+
+        .certificate::after {
+            content: "";
+            position: absolute;
+            inset: 6mm;
+            border: 1px solid #c9a45c;
+            pointer-events: none;
+        }
+
+        .content {
+            position: relative;
+            z-index: 2;
+            padding: 2mm 6mm;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* ==============================
+            TOP ORNAMENT
+        ============================== */
+
+        .top-line {
+            height: 5px;
+            width: 100%;
+            background: linear-gradient(90deg,
+                    #173b7a,
+                    #c9a45c,
+                    #173b7a);
+            margin-bottom: 10px;
+        }
+
+        /* ==============================
+            HEADER
+        ============================== */
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 2px 5px 10px;
+            border-bottom: 1px solid #c9a45c;
+        }
+
+        .logo-area {
+            width: 72px;
+            min-width: 72px;
+            height: 72px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border: 1px solid #c9a45c;
+            border-radius: 50%;
+            background: #fff;
+            padding: 4px;
+        }
+
+        .college-logo {
+            width: 58px;
+            height: 58px;
+            object-fit: contain;
+        }
+
+        .header-text {
+            flex: 1;
+            text-align: center;
+        }
+
+        .university-label {
+            font-size: 10px;
+            letter-spacing: 1.4px;
+            color: #5b6575;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .college-name {
+            margin: 0;
+            color: #173b7a;
+            font-size: 24px;
+            line-height: 1.1;
+            letter-spacing: 1.3px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .college-sub {
+            margin-top: 4px;
+            font-size: 9.5px;
+            color: #555e6c;
+            letter-spacing: 0.4px;
+        }
+
+        /* ==============================
+            CERTIFICATE BODY TITLE
+        ============================== */
+
+        .title-area {
+            text-align: center;
+            margin: 10px 0 5px;
+        }
+
+        .title-small {
+            font-size: 9.5px;
+            color: #a17a32;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 3px;
+        }
+
+        .document-title {
+            display: inline-block;
+            color: #fff;
+            background: #173b7a;
+            padding: 6px 32px;
+
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            position: relative;
+        }
+
+        .document-title::before,
+        .document-title::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            width: 40px;
+            height: 1px;
+            background: #c9a45c;
+        }
+
+        .document-title::before {
+            right: 100%;
+            margin-right: 10px;
+        }
+
+        .document-title::after {
+            left: 100%;
+            margin-left: 10px;
+        }
+
+        /* ==============================
+            MAIN DIPLOMA TEXT
+        ============================== */
+
+        .certificate-body {
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .certify-text {
+            font-size: 12px;
+            font-style: italic;
+            color: #555;
+            margin-bottom: 4px;
+        }
+
+        .student-name {
+            font-size: 26px;
+            font-weight: bold;
+            color: #173b7a;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 2px solid #c9a45c;
+            display: inline-block;
+            padding: 0 25px 2px;
+            margin: 4px 0 8px;
+        }
+
+        .body-text {
+            font-size: 13px;
+            line-height: 1.5;
+            color: #2c3542;
+            max-width: 820px;
+            margin: 0 auto;
+        }
+
+        .course-highlight {
+            font-size: 17px;
+            font-weight: bold;
+            color: #a17a32;
+            text-transform: uppercase;
+            letter-spacing: .8px;
+        }
+
+        /* ==============================
+            DETAILS GRID
+        ============================== */
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin: 10px 0;
+            background: #f8fafc;
+            border: 1px solid #cbd2dc;
+            padding: 8px;
+        }
+
+        .detail-item {
+            text-align: center;
+            border-right: 1px solid #e2e8f0;
+            padding: 0 4px;
+        }
+
+        .detail-item:last-child {
+            border-right: none;
+        }
+
+        .detail-label {
+            display: block;
+            font-size: 8px;
+            color: #697386;
+            text-transform: uppercase;
+            letter-spacing: .7px;
+            margin-bottom: 2px;
+        }
+
+        .detail-value {
+            display: block;
+            font-size: 11px;
+            color: #173b7a;
+            font-weight: bold;
+        }
+
+        /* ==============================
+            SIGNATURES
+        ============================== */
+
+        .signature-section {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 50px;
+            margin-top: 15px;
+            padding: 0 20px;
+        }
+
+        .signature {
+            text-align: center;
+        }
+
+        .signature-space {
+            height: 22px;
+        }
+
+        .signature-line {
+            border-top: 1px solid #455166;
+            padding-top: 4px;
+            font-size: 9px;
+            color: #293344;
+            font-weight: bold;
+        }
+
+        .signature-sub {
+            font-size: 7.5px;
+            color: #7a8390;
+            margin-top: 1px;
+        }
+
+        /* ==============================
+            FOOTER
+        ============================== */
+
+        .footer {
+            margin-top: 10px;
+            padding-top: 6px;
+            border-top: 1px solid #cbd2dc;
+            text-align: center;
+            font-size: 7.5px;
+            color: #667080;
+            line-height: 1.4;
+        }
+
+        .footer strong {
+            color: #173b7a;
+        }
+
+        /* ==============================
+            WATERMARK LOGO
+        ============================== */
+
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 350px;
+            height: 350px;
+            background: url('/assets/icon.png') no-repeat center center;
+            background-size: contain;
+            opacity: 0.15;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ==============================
+            PRINT RULES
+        ============================== */
+
+        @media print {
+
+            html,
+            body {
+                width: 297mm;
+                height: 210mm;
+                background: white;
+            }
+
+            .certificate {
+                width: 297mm;
+                min-height: 210mm;
+                margin: 0;
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="certificate">
+
+        <div class="watermark"></div>
+
+        <div class="content">
+
+            <!-- TOP GOLD/NAVY LINE -->
+            <div class="top-line"></div>
+
+            <!-- ================= HEADER ================= -->
+            <div class="header">
+                <div class="logo-area">
+                    <img src="/assets/icon.png" alt="College Logo" class="college-logo"
+                        onerror="this.style.display='none'">
+                </div>
+
+                <div class="header-text">
+                    <div class="university-label">
+                        Affiliated to State University &bull; Approved by Competent Authorities
+                    </div>
+                    <h1 class="college-name">
+                        Maa Gouri Devi College
+                    </h1>
+                    <div class="college-sub">
+                        Administration & Academic Examination Board &bull; Office of the Controller of Examinations
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= TITLE ================= -->
+            <div class="title-area">
+                <div class="title-small">
+                    Award of Credentials
+                </div>
+                <div class="document-title">
+                    Certificate of Course Completion
+                </div>
+            </div>
+
+            <!-- ================= CERTIFICATE TEXT ================= -->
+            <div class="certificate-body">
+                <div class="certify-text">This is to proudly certify that</div>
+
+                <div class="student-name">
+                    <%= student.first_name %>
+                        <%= student.last_name %>
+                </div>
+
+                <p class="body-text">
+                    having successfully fulfilled all prescribed academic requirements, cleared examinations across
+                    <strong>
+                        <%= courseSemesters.length %> Semesters
+                    </strong>, and completed the full course of study in
+                    <br>
+                    <span class="course-highlight">
+                        <%= student.Course.course_name %>
+                    </span>
+                    <br>
+                    under this institution.
+                </p>
+            </div>
+
+            <!-- ================= DETAILS GRID ================= -->
+            <div class="details-grid">
+                <div class="detail-item">
+                    <span class="detail-label">Enrollment No.</span>
+                    <span class="detail-value">
+                        <%= student.registration_no || 'N/A' %>
+                    </span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Admission No.</span>
+                    <span class="detail-value">
+                        <%= student.admission_no %>
+                    </span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Total Semesters</span>
+                    <span class="detail-value">
+                        <%= courseSemesters.length %>
+                    </span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Aggregate Percentage</span>
+                    <span class="detail-value">
+                        <%= aggregatePercentage %>%
+                    </span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Awarded Division</span>
+                    <span class="detail-value">
+                        <%= division %>
+                    </span>
+                </div>
+            </div>
+
+            <!-- ================= SIGNATURES ================= -->
+            <div class="signature-section">
+                <div class="signature">
+                    <div class="signature-space"></div>
+                    <div class="signature-line">Prepared By</div>
+                    <div class="signature-sub">Examination Section</div>
+                </div>
+
+                <div class="signature">
+                    <div class="signature-space"></div>
+                    <div class="signature-line">Controller of Examinations</div>
+                    <div class="signature-sub">Academic Examination Board</div>
+                </div>
+
+                <div class="signature">
+                    <div class="signature-space"></div>
+                    <div class="signature-line">Principal</div>
+                    <div class="signature-sub">Maa Gouri Devi College</div>
+                </div>
+            </div>
+
+            <!-- ================= FOOTER ================= -->
+            <div class="footer">
+                <div>
+                    <strong>Date of Issue:</strong>
+                    <%= new Date().toLocaleDateString() %> &nbsp;|&nbsp;
+                        *This is a secure system-generated computer document requiring no physical seal.*
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>

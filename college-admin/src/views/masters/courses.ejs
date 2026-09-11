@@ -1,0 +1,154 @@
+<%- include('../partials/header') %>
+    <%- include('../partials/sidebar') %>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0">Course Master</h4>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCourseModal">
+                <i class="bi bi-plus-circle"></i> Add Course
+            </button>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+
+                <!-- THE UPGRADE: Real-time Filters -->
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-2">
+                        <input type="text" id="searchInput" class="form-control"
+                            placeholder="🔍 Search course name, code...">
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <select id="filterStatus" class="form-select">
+                            <option value="">All Statuses</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle" id="courseTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Course Name</th>
+                                <th>Code</th>
+                                <th>Duration (Yrs)</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% courses.forEach(c=> { %>
+                                <tr>
+                                    <td>
+                                        <%= c.id %>
+                                    </td>
+                                    <td class="fw-bold">
+                                        <%= c.course_name %>
+                                    </td>
+                                    <td>
+                                        <%= c.course_code %>
+                                    </td>
+                                    <td>
+                                        <%= c.duration_years %>
+                                    </td>
+                                    <td>
+                                        <span class="badge <%= c.is_active ? 'bg-success' : 'bg-danger' %>">
+                                            <%= c.is_active ? 'Active' : 'Inactive' %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <form action="/admin/courses/<%= c.id %>/toggle" method="POST"
+                                            style="display:inline;">
+                                            <button type="submit"
+                                                class="btn btn-sm <%= c.is_active ? 'btn-outline-danger' : 'btn-outline-success' %>">
+                                                <%= c.is_active ? 'Deactivate' : 'Activate' %>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                                    <!-- Fallback row for empty search results -->
+                                    <tr id="noResultsRow" style="display: none;">
+                                        <td colspan="6" class="text-center text-muted py-4">No courses match your
+                                            filters.</td>
+                                    </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal -->
+        <div class="modal fade" id="addCourseModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form action="/admin/courses" method="POST">
+                        <div class="modal-header">
+                            <h5 class="modal-title">New Course</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label">Course Name (e.g. B.Ed)</label>
+                                <input type="text" name="course_name" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Course Code</label>
+                                <input type="text" name="course_code" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Duration (Years)</label>
+                                <input type="number" name="duration_years" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="modal-footer bg-light">
+                            <button type="submit" class="btn btn-primary">Save Course</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Real-Time Filter Script -->
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const searchInput = document.getElementById("searchInput");
+                const filterStatus = document.getElementById("filterStatus");
+                const tableRows = document.querySelectorAll("#courseTable tbody tr:not(#noResultsRow)");
+                const noResultsRow = document.getElementById("noResultsRow");
+
+                function filterTable() {
+                    const query = searchInput.value.toLowerCase().trim();
+                    const status = filterStatus.value.toLowerCase().trim();
+                    let visibleCount = 0;
+
+                    tableRows.forEach(row => {
+                        const rowText = row.innerText.toLowerCase();
+                        // Status is the 5th column (index 4)
+                        const rowStatus = row.cells[4].innerText.toLowerCase().trim();
+
+                        // Check matches
+                        const matchesSearch = query === "" || rowText.includes(query);
+                        const matchesStatus = status === "" || rowStatus === status;
+
+                        if (matchesSearch && matchesStatus) {
+                            row.style.display = "";
+                            visibleCount++;
+                        } else {
+                            row.style.display = "none";
+                        }
+                    });
+
+                    // Show "No Results" message if everything is filtered out
+                    noResultsRow.style.display = visibleCount === 0 ? "" : "none";
+                }
+
+                // Attach event listeners
+                searchInput.addEventListener("keyup", filterTable);
+                filterStatus.addEventListener("change", filterTable);
+            });
+        </script>
+
+        <%- include('../partials/footer') %>

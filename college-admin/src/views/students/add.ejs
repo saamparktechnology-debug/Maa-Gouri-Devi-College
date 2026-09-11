@@ -1,0 +1,232 @@
+<%- include('../partials/header') %>
+    <%- include('../partials/sidebar') %>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0">New Student Admission</h4>
+            <a href="/admin/students" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back to
+                List</a>
+        </div>
+
+        <form action="/admin/students" method="POST" enctype="multipart/form-data">
+
+            <!-- 1. Academic Details -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white fw-bold text-primary">
+                    <i class="bi bi-journal-text me-2"></i> Academic Information
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Admission No *</label>
+                            <input type="text" name="admission_no" class="form-control" required>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Admission Date *</label>
+                            <input type="date" name="admission_date" class="form-control" required>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Roll Number</label>
+                            <input type="text" name="roll_no" class="form-control">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Registration No</label>
+                            <input type="text" name="registration_no" class="form-control">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Session *</label>
+                            <select name="session_id" class="form-select" required>
+                                <option value="">Select Session...</option>
+                                <% sessions.forEach(s=> { %>
+                                    <option value="<%= s.id %>">
+                                        <%= s.session_name %>
+                                    </option>
+                                    <% }) %>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Course *</label>
+                            <select name="course_id" id="courseSelect" class="form-select" required
+                                onchange="filterSemesters()">
+                                <option value="">Select Course...</option>
+                                <% courses.forEach(c=> { %>
+                                    <option value="<%= c.id %>">
+                                        <%= c.course_name %>
+                                    </option>
+                                    <% }) %>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Current Semester *</label>
+                            <select name="semester_id" id="semesterSelect" class="form-select" required>
+                                <option value="">Select Semester...</option>
+                                <% semesters.forEach(s=> { %>
+                                    <option value="<%= s.id %>" data-course="<%= s.course_id %>">
+                                        <%= s.semester_name %>
+                                    </option>
+                                    <% }) %>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Personal Details -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white fw-bold text-primary">
+                    <i class="bi bi-person me-2"></i> Personal Information
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">First Name *</label>
+                            <input type="text" name="first_name" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Last Name *</label>
+                            <input type="text" name="last_name" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Father's Name</label>
+                            <input type="text" name="father_name" class="form-control">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Mother's Name</label>
+                            <input type="text" name="mother_name" class="form-control">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Date of Birth *</label>
+                            <input type="date" name="dob" class="form-control" required>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Gender *</label>
+                            <select name="gender" class="form-select" required>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Mobile</label>
+                            <input type="text" name="mobile" class="form-control">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" name="email" class="form-control">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Aadhaar Card Number</label>
+                            <input type="text" name="aadhaar_no" class="form-control"
+                                placeholder="Enter 12-digit Aadhaar number" maxlength="12">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Full Address</label>
+                            <input type="text" name="address" class="form-control">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">City</label>
+                            <input type="text" name="city" class="form-control">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">State</label>
+                            <input type="text" name="state" class="form-control">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Pin Code</label>
+                            <input type="text" name="pincode" class="form-control">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Dynamic Unlimited Documents -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <span class="fw-bold text-primary"><i class="bi bi-file-earmark-arrow-up me-2"></i> Documents (JPG,
+                        PNG, PDF | Max 5MB)</span>
+                    <button type="button" class="btn btn-sm btn-outline-primary fw-bold" onclick="addDocumentRow()">
+                        <i class="bi bi-plus-circle"></i> Add More Document +
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="documentContainer">
+                        <!-- Mandatory Photograph Row -->
+                        <div class="row document-row mb-3 align-items-end">
+                            <div class="col-md-5">
+                                <label class="form-label small text-muted">Document Type / Title *</label>
+                                <input type="text" name="document_types[]" class="form-control" value="Photograph"
+                                    readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small text-muted">Student Photograph *</label>
+                                <input type="file" name="photograph" class="form-control" accept=".jpg,.jpeg,.png"
+                                    required>
+                            </div>
+                            <div class="col-md-1 text-end"></div>
+                        </div>
+
+                        <!-- Default Additional Document Row -->
+                        <div class="row document-row mb-3 align-items-end">
+                            <div class="col-md-5">
+                                <input type="text" name="document_types[]" class="form-control"
+                                    placeholder="e.g., ID Proof, 10th Certificate">
+                            </div>
+                            <div class="col-md-6">
+                                <input type="file" name="documents" class="form-control" accept=".jpg,.jpeg,.png,.pdf">
+                            </div>
+                            <div class="col-md-1 text-end"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-5 text-end">
+                <button type="submit" class="btn btn-primary btn-lg px-5">
+                    <i class="bi bi-check-circle"></i> Save Student Record
+                </button>
+            </div>
+        </form>
+
+        <script>
+            function filterSemesters() {
+                const courseId = document.getElementById('courseSelect').value;
+                const semSelect = document.getElementById('semesterSelect');
+                const options = semSelect.querySelectorAll('option');
+
+                semSelect.value = '';
+                options.forEach(opt => {
+                    if (opt.value === "") return;
+                    if (opt.getAttribute('data-course') === courseId) { opt.style.display = 'block'; }
+                    else { opt.style.display = 'none'; }
+                });
+            }
+
+            function addDocumentRow() {
+                const container = document.getElementById('documentContainer');
+                const row = document.createElement('div');
+                row.className = 'row document-row mb-3 align-items-end';
+                row.innerHTML = `
+            <div class="col-md-5">
+                <input type="text" name="document_types[]" class="form-control" placeholder="Document Type / Title">
+            </div>
+            <div class="col-md-6">
+                <input type="file" name="documents" class="form-control" accept=".jpg,.jpeg,.png,.pdf">
+            </div>
+            <div class="col-md-1 text-end">
+                <button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="this.closest('.document-row').remove()">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+        `;
+                container.appendChild(row);
+            }
+        </script>
+
+        <%- include('../partials/footer') %>

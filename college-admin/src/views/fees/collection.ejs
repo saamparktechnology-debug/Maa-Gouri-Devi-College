@@ -1,0 +1,144 @@
+<%- include('../partials/header') %>
+    <%- include('../partials/sidebar') %>
+
+        <div class="mb-4">
+            <h4 class="mb-0">Collect Fees</h4>
+            <small class="text-muted">Select a student to view their fee dashboard and collect payments.</small>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+
+                <!-- 3-Part Real-time Filters -->
+                <div class="row mb-4">
+                    <div class="col-md-4 mb-2">
+                        <input type="text" id="searchInput" class="form-control"
+                            placeholder="🔍 Search Adm No, Name...">
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <select id="filterCourse" class="form-select">
+                            <option value="">All Courses</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <select id="filterSession" class="form-select">
+                            <option value="">All Sessions</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle" id="feeCollectionTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Adm No.</th>
+                                <th>Student Name</th>
+                                <th>Course</th>
+                                <th>Session</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (students.length===0) { %>
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted py-4">No students found.</td>
+                                </tr>
+                                <% } else { %>
+                                    <% students.forEach(s=> { %>
+                                        <tr>
+                                            <td class="fw-bold">
+                                                <%= s.admission_no %>
+                                            </td>
+                                            <td>
+                                                <%= s.first_name %>
+                                                    <%= s.last_name %>
+                                            </td>
+                                            <td>
+                                                <%= s.Course ? s.Course.course_name : 'N/A' %>
+                                            </td>
+                                            <td>
+                                                <%= s.AcademicSession ? s.AcademicSession.session_name : 'N/A' %>
+                                            </td>
+                                            <td>
+                                                <a href="/admin/fees/collection/<%= s.id %>"
+                                                    class="btn btn-sm btn-success fw-bold">
+                                                    <i class="bi bi-cash-coin"></i> Collect Fee
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        <% }) %>
+                                            <% } %>
+                                                <tr id="noResultsRow" style="display: none;">
+                                                    <td colspan="5" class="text-center text-muted py-4">No students
+                                                        match your filters.</td>
+                                                </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Real-Time Filter Engine
+            document.addEventListener("DOMContentLoaded", () => {
+                const searchInput = document.getElementById("searchInput");
+                const filterCourse = document.getElementById("filterCourse");
+                const filterSession = document.getElementById("filterSession");
+                const tableRows = document.querySelectorAll("#feeCollectionTable tbody tr:not(#noResultsRow)");
+                const noResultsRow = document.getElementById("noResultsRow");
+
+                // 1. Auto-Populate Dropdowns
+                const uniqueCourses = new Set();
+                const uniqueSessions = new Set();
+
+                tableRows.forEach(row => {
+                    if (row.cells.length < 5) return;
+                    const courseText = row.cells[2].innerText.trim();
+                    const sessionText = row.cells[3].innerText.trim();
+
+                    if (courseText && courseText !== 'N/A') uniqueCourses.add(courseText);
+                    if (sessionText && sessionText !== 'N/A') uniqueSessions.add(sessionText);
+                });
+
+                uniqueCourses.forEach(c => filterCourse.add(new Option(c, c.toLowerCase())));
+                uniqueSessions.forEach(s => filterSession.add(new Option(s, s.toLowerCase())));
+
+                // 2. Filter Logic
+                function filterTable() {
+                    const query = searchInput.value.toLowerCase().trim();
+                    const course = filterCourse.value.toLowerCase().trim();
+                    const session = filterSession.value.toLowerCase().trim();
+
+                    let visibleCount = 0;
+
+                    tableRows.forEach(row => {
+                        if (row.cells.length < 5) return;
+
+                        const rowText = row.innerText.toLowerCase();
+                        const rowCourse = row.cells[2].innerText.toLowerCase().trim();
+                        const rowSession = row.cells[3].innerText.toLowerCase().trim();
+
+                        const matchesSearch = query === "" || rowText.includes(query);
+                        const matchesCourse = course === "" || rowCourse === course;
+                        const matchesSession = session === "" || rowSession === session;
+
+                        if (matchesSearch && matchesCourse && matchesSession) {
+                            row.style.display = "";
+                            visibleCount++;
+                        } else {
+                            row.style.display = "none";
+                        }
+                    });
+
+                    if (noResultsRow) {
+                        noResultsRow.style.display = visibleCount === 0 ? "" : "none";
+                    }
+                }
+
+                searchInput.addEventListener("keyup", filterTable);
+                filterCourse.addEventListener("change", filterTable);
+                filterSession.addEventListener("change", filterTable);
+            });
+        </script>
+
+        <%- include('../partials/footer') %>

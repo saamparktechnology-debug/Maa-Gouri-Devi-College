@@ -1,0 +1,181 @@
+<%- include('../partials/header') %>
+    <%- include('../partials/sidebar') %>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0">Monthly Attendance Matrix</h4>
+        </div>
+
+        <!-- Filter Form -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <form action="/admin/attendance/monthly" method="GET" class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label">Session</label>
+                        <select name="session_id" class="form-select" required>
+                            <option value="">Select...</option>
+                            <% sessions.forEach(s=> { %>
+                                <option value="<%= s.id %>" <%=(typeof selectedSession !=='undefined' &&
+                                    selectedSession==s.id) ? 'selected' : '' %>><%= s.session_name %>
+                                </option>
+                                <% }) %>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Course</label>
+                        <select name="course_id" id="courseSelect" class="form-select" required
+                            onchange="filterSemesters()">
+                            <option value="">Select...</option>
+                            <% courses.forEach(c=> { %>
+                                <option value="<%= c.id %>" <%=(typeof selectedCourse !=='undefined' &&
+                                    selectedCourse==c.id) ? 'selected' : '' %>><%= c.course_name %>
+                                </option>
+                                <% }) %>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Semester</label>
+                        <select name="semester_id" id="semesterSelect" class="form-select" required>
+                            <option value="">Select...</option>
+                            <% semesters.forEach(sem=> { %>
+                                <option value="<%= sem.id %>" data-course="<%= sem.course_id %>" <%=(typeof
+                                    selectedSemester !=='undefined' && selectedSemester==sem.id) ? 'selected' : '' %>>
+                                    <%= sem.semester_name %>
+                                </option>
+                                <% }) %>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Month</label>
+                        <input type="month" name="month" class="form-control"
+                            value="<%= typeof month !== 'undefined' ? month : '' %>" required>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100"><i class="bi bi-table"></i> Generate
+                            Matrix</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Report Table -->
+        <% if (typeof reportData !=='undefined' ) { %>
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0 text-primary">Daily Record for <%= month %>
+                    </h6>
+                    <input type="text" id="searchInput" class="form-control form-control-sm w-25"
+                        placeholder="🔍 Find Student...">
+                </div>
+                <div class="card-body p-0">
+                    <!-- table-responsive ensures horizontal scrolling for 31 days -->
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm table-bordered align-middle mb-0 text-center"
+                            id="reportTable" style="font-size: 0.85rem;">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="text-start ps-3" style="min-width: 100px;">Roll/Adm</th>
+                                    <th class="text-start" style="min-width: 150px;">Student Name</th>
+                                    <!-- Generate Day Columns 1 to 31 -->
+                                    <% for(let i=1; i <=daysInMonth; i++) { %>
+                                        <th style="min-width: 35px;">
+                                            <%= i %>
+                                        </th>
+                                        <% } %>
+                                            <th class="text-success" style="min-width: 40px;">P</th>
+                                            <th class="text-danger" style="min-width: 40px;">A</th>
+                                            <th>%</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% if (reportData.length===0) { %>
+                                    <tr>
+                                        <td colspan="<%= daysInMonth + 5 %>" class="text-center py-4 text-muted">No
+                                            records found.</td>
+                                    </tr>
+                                    <% } %>
+                                        <% reportData.forEach(s=> { %>
+                                            <tr>
+                                                <td class="text-start ps-3 fw-bold">
+                                                    <%= s.admission_no %>
+                                                </td>
+                                                <td class="text-start" style="white-space: nowrap;">
+                                                    <%= s.name %>
+                                                </td>
+
+                                                <!-- Generate Status for each Day -->
+                                                <% for(let i=1; i <=daysInMonth; i++) { let status=s.dailyStatus[i]
+                                                    || '-' ; let textColor='text-muted' ; if(status==='P' )
+                                                    textColor='text-success fw-bold' ; else if(status==='A' )
+                                                    textColor='text-danger fw-bold' ; else if(status==='L' )
+                                                    textColor='text-warning fw-bold' ; %>
+                                                    <td class="<%= textColor %>">
+                                                        <%= status %>
+                                                    </td>
+                                                    <% } %>
+
+                                                        <td class="text-success fw-bold bg-light">
+                                                            <%= s.present %>
+                                                        </td>
+                                                        <td class="text-danger fw-bold bg-light">
+                                                            <%= s.absent %>
+                                                        </td>
+                                                        <td class="bg-light">
+                                                            <% let badgeColor='bg-danger' ; if (s.percentage>= 75) {
+                                                                badgeColor = 'bg-success';
+                                                                } else if (s.percentage >= 60) {
+                                                                badgeColor = 'bg-warning text-dark';
+                                                                }
+                                                                %>
+                                                                <span class="badge <%= badgeColor %>">
+                                                                    <%= s.percentage %>%
+                                                                </span>
+                                                        </td>
+                                            </tr>
+                                            <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <% } %>
+
+                <script>
+                    function filterSemesters() {
+                        const courseId = document.getElementById('courseSelect').value;
+                        const semSelect = document.getElementById('semesterSelect');
+                        const options = semSelect.querySelectorAll('option');
+                        semSelect.value = '';
+                        options.forEach(opt => {
+                            if (opt.value === "") return;
+                            if (opt.getAttribute('data-course') === courseId) { opt.style.display = 'block'; }
+                            else { opt.style.display = 'none'; }
+                        });
+                    }
+
+                    document.addEventListener("DOMContentLoaded", () => {
+                        const searchInput = document.getElementById("searchInput");
+                        if (searchInput) {
+                            searchInput.addEventListener("keyup", function () {
+                                const query = this.value.toLowerCase().trim();
+                                const rows = document.querySelectorAll("#reportTable tbody tr");
+
+                                rows.forEach(row => {
+                                    // Skip if it's the "No records" row
+                                    if (row.cells.length < 5) return;
+
+                                    // Only search the Admission No and Name columns (index 0 and 1)
+                                    const admText = row.cells[0].innerText.toLowerCase();
+                                    const nameText = row.cells[1].innerText.toLowerCase();
+
+                                    if (admText.includes(query) || nameText.includes(query)) {
+                                        row.style.display = "";
+                                    } else {
+                                        row.style.display = "none";
+                                    }
+                                });
+                            });
+                        }
+                    });
+                </script>
+
+                <%- include('../partials/footer') %>

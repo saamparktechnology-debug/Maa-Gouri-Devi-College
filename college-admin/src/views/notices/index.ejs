@@ -1,0 +1,98 @@
+<%- include('../partials/header') %>
+    <%- include('../partials/sidebar') %>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0">Notice Board Manager</h4>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addNoticeModal">
+                <i class="bi bi-plus-circle"></i> Upload New Notice
+            </button>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Title</th>
+                                <th>Description</th>
+                                <th>File Name</th>
+                                <th>Date Posted</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (notices.length===0) { %>
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted py-4">No notices uploaded yet.</td>
+                                </tr>
+                                <% } else { %>
+                                    <% notices.forEach(n=> { %>
+                                        <tr>
+                                            <td class="fw-bold text-primary">
+                                                <%= n.title %>
+                                            </td>
+                                            <td>
+                                                <%= n.description || 'N/A' %>
+                                            </td>
+                                            <td>
+                                                <%= n.file_name %>
+                                            </td>
+                                            <td>
+                                                <%= new Date(n.created_at).toLocaleDateString() %>
+                                            </td>
+                                            <td class="text-end">
+                                                <a href="/admin/notices/view/<%= n.id %>" target="_blank"
+                                                    class="btn btn-sm btn-outline-info">
+                                                    <i class="bi bi-file-earmark-pdf"></i> View PDF
+                                                </a>
+                                                <form action="/admin/notices/delete/<%= n.id %>" method="POST"
+                                                    class="d-inline" onsubmit="return confirm('Delete this notice?');">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger"><i
+                                                            class="bi bi-trash"></i></button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                        <% }) %>
+                                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upload Modal -->
+        <div class="modal fade" id="addNoticeModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form action="/admin/notices" method="POST" enctype="multipart/form-data">
+                        <div class="modal-header">
+                            <h5 class="modal-title fw-bold">Upload Notice Circular</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label">Notice Title *</label>
+                                <input type="text" name="title" class="form-control" required
+                                    placeholder="e.g., Semester Exam Schedule">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Description / Summary</label>
+                                <textarea name="description" class="form-control" rows="3"
+                                    placeholder="Short description..."></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Upload PDF Document *</label>
+                                <input type="file" name="notice_pdf" class="form-control" accept=".pdf" required>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Upload & Publish</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <%- include('../partials/footer') %>

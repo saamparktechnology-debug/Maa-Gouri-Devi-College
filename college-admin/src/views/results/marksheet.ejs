@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statement of Marks - <%= result.Student.admission_no %>
+    </title>
+
+    <style>
+        @page {
+            size: A4;
+            margin: 0;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Times New Roman", Georgia, serif;
+            background: #dfe3e8;
+            color: #172033;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        /* ==============================
+            PAGE
+        ============================== */
+
+        .marksheet {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 18px auto;
+            padding: 10mm;
+            position: relative;
+            overflow: hidden;
+
+            background:
+                radial-gradient(circle at 50% 40%,
+                    rgba(30, 58, 138, 0.025),
+                    transparent 45%),
+                #fff;
+
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.25);
+            border: 1px solid #b18a3d;
+        }
+
+        /* Elegant inner certificate border */
+        .marksheet::before {
+            content: "";
+            position: absolute;
+            inset: 4mm;
+            border: 2px solid #173b7a;
+            pointer-events: none;
+        }
+
+        .marksheet::after {
+            content: "";
+            position: absolute;
+            inset: 6mm;
+            border: 1px solid #c9a45c;
+            pointer-events: none;
+        }
+
+        .content {
+            position: relative;
+            z-index: 2;
+            padding: 4mm;
+        }
+
+        /* ==============================
+            TOP ORNAMENT
+        ============================== */
+
+        .top-line {
+            height: 5px;
+            width: 100%;
+            background: linear-gradient(90deg,
+                    #173b7a,
+                    #c9a45c,
+                    #173b7a);
+            margin-bottom: 13px;
+        }
+
+        /* ==============================
+            HEADER
+        ============================== */
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 5px 5px 13px;
+            border-bottom: 1px solid #c9a45c;
+        }
+
+        .logo-area {
+            width: 78px;
+            min-width: 78px;
+            height: 78px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border: 1px solid #c9a45c;
+            border-radius: 50%;
+            background: #fff;
+            padding: 5px;
+        }
+
+        .college-logo {
+            width: 64px;
+            height: 64px;
+            object-fit: contain;
+        }
+
+        .header-text {
+            flex: 1;
+            text-align: center;
+        }
+
+        .university-label {
+            font-size: 10px;
+            letter-spacing: 1.4px;
+            color: #5b6575;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .college-name {
+            margin: 0;
+            color: #173b7a;
+            font-size: 25px;
+            line-height: 1.1;
+            letter-spacing: 1.3px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .college-sub {
+            margin-top: 6px;
+            font-size: 10px;
+            color: #555e6c;
+            letter-spacing: 0.4px;
+        }
+
+        /* ==============================
+            DOCUMENT TITLE
+        ============================== */
+
+        .title-area {
+            text-align: center;
+            margin: 15px 0 13px;
+        }
+
+        .title-small {
+            font-size: 9px;
+            color: #a17a32;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .document-title {
+            display: inline-block;
+            color: #fff;
+            background: #173b7a;
+            padding: 8px 28px;
+
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 1.7px;
+            text-transform: uppercase;
+            position: relative;
+        }
+
+        .document-title::before,
+        .document-title::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            width: 30px;
+            height: 1px;
+            background: #c9a45c;
+        }
+
+        .document-title::before {
+            right: 100%;
+            margin-right: 8px;
+        }
+
+        .document-title::after {
+            left: 100%;
+            margin-left: 8px;
+        }
+
+        /* ==============================
+            STUDENT INFORMATION
+        ============================== */
+
+        .section-heading {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 12px 0 7px;
+
+            color: #173b7a;
+            font-size: 10px;
+            font-weight: bold;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+        }
+
+        .section-heading::after {
+            content: "";
+            height: 1px;
+            flex: 1;
+            background: #d5dbe4;
+        }
+
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10.5px;
+        }
+
+        .info-table th,
+        .info-table td {
+            border: 1px solid #c9d0da;
+            padding: 7px 8px;
+            vertical-align: middle;
+        }
+
+        .info-table th {
+            width: 20%;
+            background: #f2f5f9;
+            color: #173b7a;
+            font-size: 8.5px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+            text-align: left;
+        }
+
+        .info-table td {
+            font-weight: bold;
+            color: #1c2535;
+            background: rgba(255, 255, 255, .8);
+        }
+
+        .student-name {
+            color: #173b7a !important;
+            font-size: 13px;
+            letter-spacing: .5px;
+            text-transform: uppercase;
+        }
+
+        /* ==============================
+            MARKS TABLE
+        ============================== */
+
+        .marks-section {
+            margin-top: 15px;
+        }
+
+        .marks-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10.5px;
+        }
+
+        .marks-table thead th {
+            padding: 8px 6px;
+            background: #173b7a;
+            color: white;
+            border: 1px solid #173b7a;
+
+            font-size: 8.5px;
+            text-transform: uppercase;
+            letter-spacing: .6px;
+        }
+
+        .marks-table tbody td {
+            padding: 7px 6px;
+            border: 1px solid #c7ced8;
+            text-align: center;
+            height: 29px;
+            background: rgba(255, 255, 255, 0.85);
+        }
+
+        .marks-table tbody tr:nth-child(even) td {
+            background: rgba(248, 250, 252, 0.85);
+        }
+
+        .marks-table .subject {
+            text-align: left;
+            font-weight: bold;
+            color: #202938;
+        }
+
+        .marks-table .code {
+            color: #173b7a;
+            font-weight: bold;
+        }
+
+        .marks-table .obtained {
+            font-weight: bold;
+            color: #173b7a;
+        }
+
+        .marks-table .grade {
+            font-weight: bold;
+            color: #a17a32;
+        }
+
+        /* ==============================
+            SUMMARY
+        ============================== */
+
+        .summary {
+            margin-top: 15px;
+            border: 1px solid #b9c2cf;
+            background: rgba(247, 249, 252, 0.9);
+        }
+
+        .summary-top {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+
+        .summary-item {
+            padding: 10px 8px;
+            text-align: center;
+            border-right: 1px solid #cbd2dc;
+        }
+
+        .summary-item:last-child {
+            border-right: none;
+        }
+
+        .summary-label {
+            display: block;
+            font-size: 8px;
+            color: #697386;
+            text-transform: uppercase;
+            letter-spacing: .8px;
+            margin-bottom: 4px;
+        }
+
+        .summary-value {
+            display: block;
+            font-size: 15px;
+            color: #173b7a;
+            font-weight: bold;
+        }
+
+        .result-banner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 0;
+            padding: 9px 13px;
+            border-top: 1px solid #cbd2dc;
+            background: #eef3f8;
+        }
+
+        .result-label {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: bold;
+            color: #4e5968;
+        }
+
+        .pass {
+            color: #16803c;
+        }
+
+        .fail {
+            color: #b42318;
+        }
+
+        .result-value {
+            font-size: 13px;
+            font-weight: bold;
+            letter-spacing: .7px;
+        }
+
+        /* ==============================
+            CLASSIFICATION
+        ============================== */
+
+        .classification {
+            margin-top: 11px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .classification-box {
+            border: 1px solid #c9a45c;
+            background: rgba(255, 253, 248, 0.9);
+            padding: 6px 22px;
+            color: #76551d;
+            font-size: 9px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* ==============================
+            SIGNATURES
+        ============================== */
+
+        .signature-section {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 35px;
+            margin-top: 42px;
+        }
+
+        .signature {
+            text-align: center;
+        }
+
+        .signature-space {
+            height: 28px;
+        }
+
+        .signature-line {
+            border-top: 1px solid #455166;
+            padding-top: 5px;
+            font-size: 9px;
+            color: #293344;
+            font-weight: bold;
+        }
+
+        .signature-sub {
+            font-size: 7.5px;
+            color: #7a8390;
+            margin-top: 2px;
+        }
+
+        /* ==============================
+            FOOTER
+        ============================== */
+
+        .footer {
+            margin-top: 18px;
+            padding-top: 8px;
+            border-top: 1px solid #cbd2dc;
+            text-align: center;
+            font-size: 7.5px;
+            color: #667080;
+            line-height: 1.5;
+        }
+
+        .footer strong {
+            color: #173b7a;
+        }
+
+        .footer-note {
+            margin-top: 3px;
+            font-style: italic;
+        }
+
+        /* ==============================
+            WATERMARK LOGO
+        ============================== */
+
+        .watermark {
+            position: absolute;
+            top: 42%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 420px;
+            height: 420px;
+            background: url('/assets/icon.png') no-repeat center center;
+            background-size: contain;
+            opacity: 0.25;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ==============================
+            PRINT
+        ============================== */
+
+        @media print {
+
+            html,
+            body {
+                width: 210mm;
+                height: 297mm;
+                background: white;
+            }
+
+            .marksheet {
+                width: 210mm;
+                min-height: 297mm;
+                margin: 0;
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="marksheet">
+
+        <div class="watermark"></div>
+
+        <div class="content">
+
+            <!-- TOP GOLD/NAVY LINE -->
+            <div class="top-line"></div>
+
+            <!-- ================= HEADER ================= -->
+            <div class="header">
+                <div class="logo-area">
+                    <img src="/assets/icon.png" alt="College Logo" class="college-logo"
+                        onerror="this.style.display='none'">
+                </div>
+
+                <div class="header-text">
+                    <div class="university-label">
+                        Affiliated to State University
+                    </div>
+                    <h1 class="college-name">
+                        Maa Gouri Devi College
+                    </h1>
+                    <div class="college-sub">
+                        Administration & Academic Examination Board
+                        <br>
+                        Recognized & Approved by Competent Authorities
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= TITLE ================= -->
+            <div class="title-area">
+                <div class="title-small">
+                    Academic Examination
+                </div>
+                <div class="document-title">
+                    Statement of Marks
+                </div>
+            </div>
+
+            <!-- ================= STUDENT DETAILS ================= -->
+            <div class="section-heading">
+                Student Particulars
+            </div>
+
+            <table class="info-table">
+                <tr>
+                    <th>Enrollment / Reg. No.</th>
+                    <td>
+                        <%= result.Student.registration_no || 'N/A' %>
+                    </td>
+                    <th>Roll Number</th>
+                    <td>
+                        <%= result.Student.roll_no || result.Student.admission_no %>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Student's Name</th>
+                    <td colspan="3" class="student-name">
+                        <%= result.Student.first_name %>
+                            <%= result.Student.last_name %>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Father's Name</th>
+                    <td>
+                        <%= result.Student.father_name || 'N/A' %>
+                    </td>
+                    <th>Mother's Name</th>
+                    <td>
+                        <%= result.Student.mother_name || 'N/A' %>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Course</th>
+                    <td>
+                        <%= result.Course.course_name %>
+                    </td>
+                    <th>Semester / Session</th>
+                    <td>
+                        <%= result.Semester.semester_name %> (<%= result.AcademicSession ?
+                                result.AcademicSession.session_name : 'N/A' %>)
+                    </td>
+                </tr>
+            </table>
+
+            <!-- ================= MARKS ================= -->
+            <div class="section-heading marks-section">
+                Academic Performance
+            </div>
+
+            <table class="marks-table">
+                <thead>
+                    <tr>
+                        <th style="width: 13%;">Subject Code</th>
+                        <th style="width: 43%; text-align:left;">Subject Name</th>
+                        <th style="width: 14%;">Maximum</th>
+                        <th style="width: 16%;">Obtained</th>
+                        <th style="width: 14%;">Grade</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% result.ResultSubjectMarks.forEach(mark=> { %>
+                        <tr>
+                            <td class="code">
+                                <%= mark.Subject.subject_code %>
+                            </td>
+                            <td class="subject">
+                                <%= mark.Subject.subject_name %>
+                            </td>
+                            <td>
+                                <%= mark.Subject.max_marks %>
+                            </td>
+                            <td class="obtained">
+                                <%= mark.obtained_marks %>
+                            </td>
+                            <td class="grade">
+                                <%= mark.grade %>
+                            </td>
+                        </tr>
+                        <% }) %>
+                </tbody>
+            </table>
+
+            <!-- ================= SUMMARY ================= -->
+            <div class="section-heading">
+                Result Summary
+            </div>
+
+            <div class="summary">
+                <div class="summary-top">
+                    <div class="summary-item">
+                        <span class="summary-label">Total Marks</span>
+                        <span class="summary-value">
+                            <%= parseInt(result.total_obtained_marks) %>
+                        </span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Maximum Marks</span>
+                        <span class="summary-value">
+                            <%= result.total_max_marks %>
+                        </span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Percentage</span>
+                        <span class="summary-value">
+                            <%= result.percentage %>%
+                        </span>
+                    </div>
+                </div>
+
+                <div class="result-banner">
+                    <span class="result-label">Final Result</span>
+                    <span class="result-value <%= result.result_status === 'PASS' ? 'pass' : 'fail' %>">
+                        <%= result.result_status==='PASS' ? 'PASSED IN FIRST DIVISION' : 'FAILED' %>
+                    </span>
+                </div>
+            </div>
+
+            <!-- ================= CLASSIFICATION ================= -->
+            <% if (result.result_status==='PASS' ) { %>
+                <div class="classification">
+                    <div class="classification-box">
+                        Successful Completion of Examination
+                    </div>
+                </div>
+                <% } %>
+
+                    <!-- ================= SIGNATURES ================= -->
+                    <div class="signature-section">
+                        <div class="signature">
+                            <div class="signature-space"></div>
+                            <div class="signature-line">Prepared By</div>
+                            <div class="signature-sub">Examination Section</div>
+                        </div>
+
+                        <div class="signature">
+                            <div class="signature-space"></div>
+                            <div class="signature-line">Controller of Examinations</div>
+                            <div class="signature-sub">Academic Examination Board</div>
+                        </div>
+
+                        <div class="signature">
+                            <div class="signature-space"></div>
+                            <div class="signature-line">Principal</div>
+                            <div class="signature-sub">Maa Gouri Devi College</div>
+                        </div>
+                    </div>
+
+                    <!-- ================= FOOTER ================= -->
+                    <div class="footer">
+                        <div>
+                            <strong>Date of Issue:</strong>
+                            <%= new Date(result.published_date).toLocaleDateString() %>
+                        </div>
+                        <div class="footer-note">
+                            This is a system-generated academic document and does not require a physical seal unless
+                            otherwise specified by the institution.
+                        </div>
+                        <div>
+                            <strong>Document Verification:</strong> Verify this statement through the official
+                            examination portal.
+                        </div>
+                    </div>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>

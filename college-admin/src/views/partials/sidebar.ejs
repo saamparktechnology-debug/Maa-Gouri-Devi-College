@@ -1,0 +1,547 @@
+<style>
+    /* ================================
+        SIDEBAR
+    ================================ */
+    .sidebar {
+        width: 260px;
+        height: 100vh;
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+
+        background: #111827 !important;
+        border-right: 1px solid #1f2937 !important;
+    }
+
+    /* ================================
+        FIXED BRAND / HEADER
+    ================================ */
+    .sidebar-brand {
+        width: 100%;
+        padding: 10px 0px !important;
+        background: #111827 !important;
+        border-bottom: 1px solid #1f2937 !important;
+    }
+
+    .sidebar-brand-inner {
+        width: 100%;
+    }
+
+    .sidebar-brand-text {
+        width: 100%;
+        background: #111827 !important;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .sidebar-logo {
+        width: 205px;
+        height: 55px;
+        object-fit: contain;
+        display: block;
+    }
+
+    .sidebar-brand-title {
+        color: #fff;
+        font-size: 17px;
+        font-weight: 700;
+        line-height: 1.2;
+        white-space: nowrap;
+    }
+
+    .brand-subtitle {
+        display: block;
+        color: #6b7280;
+        font-size: 10px;
+        font-weight: 400;
+        margin-top: 3px;
+        white-space: nowrap;
+    }
+
+    /* ================================
+        SCROLLABLE MENU AREA
+    ================================ */
+    .sidebar-menu {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-bottom: 15px;
+    }
+
+    .sidebar-menu::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    .sidebar-menu::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .sidebar-menu::-webkit-scrollbar-thumb {
+        background: #374151;
+        border-radius: 10px;
+    }
+
+    .sidebar-menu:hover::-webkit-scrollbar-thumb {
+        background: #4b5563;
+    }
+
+    /* Firefox */
+    .sidebar-menu {
+        scrollbar-width: thin;
+        scrollbar-color: #374151 transparent;
+    }
+
+    /* ================================
+        SECTION TITLES
+    ================================ */
+    .sidebar-section-title {
+        color: #6b7280;
+        font-size: 10px;
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 1px;
+        padding: 18px 18px 7px;
+    }
+
+    /* ================================
+        MENU LINKS
+    ================================ */
+    .sidebar-menu-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 15px;
+        margin: 2px 10px;
+        color: #cbd5e1;
+        text-decoration: none;
+        border-radius: 7px;
+        font-size: 13px;
+        transition: all 0.2s ease;
+    }
+
+    .sidebar-menu-link i {
+        width: 20px;
+        text-align: center;
+        font-size: 15px;
+        color: #94a3b8;
+        flex-shrink: 0;
+    }
+
+    .sidebar-menu-link:hover {
+        background: #1e293b;
+        color: #fff;
+    }
+
+    .sidebar-menu-link:hover i {
+        color: #60a5fa;
+    }
+
+    .sidebar-menu-link.active {
+        background: #2563eb;
+        color: #fff;
+        box-shadow: 0 3px 10px rgba(37, 99, 235, 0.25);
+    }
+
+    .sidebar-menu-link.active i {
+        color: #fff;
+    }
+
+    /* ================================
+        FIXED LOGOUT
+    ================================ */
+    .sidebar-logout {
+        flex-shrink: 0;
+        padding: 12px 10px 15px;
+        border-top: 1px solid #1f2937;
+        background: #111827;
+    }
+
+    .sidebar-logout .btn {
+        border-color: #374151;
+        color: #f87171;
+    }
+
+    .sidebar-logout .btn:hover {
+        background: #dc2626;
+        border-color: #dc2626;
+        color: #fff;
+    }
+
+    /* ================================
+        MAIN CONTENT
+    ================================ */
+    .main-content {
+        min-width: 0;
+    }
+
+    /* ================================
+        MOBILE
+    ================================ */
+    @media (max-width: 767.98px) {
+        .sidebar {
+            position: fixed;
+            left: -270px;
+            top: 0;
+            z-index: 1050;
+            transition: left 0.25s ease;
+            box-shadow: 5px 0 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .sidebar.show {
+            left: 0;
+        }
+
+        .main-content {
+            width: 100%;
+        }
+    }
+</style>
+
+
+<div class="sidebar" id="sidebar">
+
+    <!-- =========================
+         FIXED BRAND / HEADER
+    ========================= -->
+    <div class="sidebar-brand">
+
+        <img src="/assets/logo/logo.png" alt="MGD College Logo" class="sidebar-logo">
+
+    </div>
+
+
+    <!-- =========================
+         SCROLLABLE MENU
+    ========================= -->
+    <div class="sidebar-menu">
+
+        <!-- =========================
+             MAIN
+        ========================= -->
+        <div class="sidebar-section-title">
+            Main
+        </div>
+
+        <a href="/admin/dashboard" class="sidebar-menu-link">
+            <i class="bi bi-speedometer2"></i>
+            <span>Dashboard</span>
+        </a>
+
+
+        <!-- =========================
+             ACADEMICS
+        ========================= -->
+        <div class="sidebar-section-title">
+            Academic Management
+        </div>
+
+        <a href="/admin/courses" class="sidebar-menu-link">
+            <i class="bi bi-journal-bookmark"></i>
+            <span>Courses</span>
+        </a>
+
+        <a href="/admin/subjects" class="sidebar-menu-link">
+            <i class="bi bi-book"></i>
+            <span>Subjects</span>
+        </a>
+
+        <a href="/admin/semesters" class="sidebar-menu-link">
+            <i class="bi bi-layers"></i>
+            <span>Semesters</span>
+        </a>
+
+
+        <!-- =========================
+             STUDENTS
+        ========================= -->
+        <div class="sidebar-section-title">
+            Student Management
+        </div>
+
+        <a href="/admin/students" class="sidebar-menu-link">
+            <i class="bi bi-people"></i>
+            <span>Student Directory</span>
+        </a>
+
+        <a href="/admin/students/create" class="sidebar-menu-link">
+            <i class="bi bi-person-plus"></i>
+            <span>New Admission</span>
+        </a>
+
+
+        <!-- =========================
+             STAFF & FACULTY
+        ========================= -->
+        <div class="sidebar-section-title">
+            Staff & Faculty
+        </div>
+
+        <a href="/admin/teachers" class="sidebar-menu-link">
+            <i class="bi bi-person-badge"></i>
+            <span>Teacher Directory</span>
+        </a>
+
+        <a href="/admin/teachers/create" class="sidebar-menu-link">
+            <i class="bi bi-person-plus-fill"></i>
+            <span>Add Teacher</span>
+        </a>
+
+        <a href="/admin/teachers/attendance/daily" class="sidebar-menu-link">
+            <i class="bi bi-calendar-check"></i>
+            <span>Staff Daily Attendance</span>
+        </a>
+
+        <a href="/admin/teachers/attendance/monthly" class="sidebar-menu-link">
+            <i class="bi bi-calendar3-range"></i>
+            <span>Staff Monthly Report</span>
+        </a>
+
+
+        <!-- =========================
+             NOTICES & CIRCULARS
+        ========================= -->
+        <div class="sidebar-section-title">
+            Notices & Circulars
+        </div>
+
+        <a href="/admin/marksheets" class="list-group-item list-group-item-action py-2">
+            <i class="bi bi-file-earmark-pdf me-2"></i>
+            Session Marksheets
+        </a>
+
+        <a href="/admin/notices" class="list-group-item list-group-item-action py-2">
+            <i class="bi bi-bell me-2"></i>
+            Notice Board
+        </a>
+
+
+        <!-- =========================
+             FINANCE
+        ========================= -->
+        <div class="sidebar-section-title">
+            Finance
+        </div>
+
+        <a href="/admin/fees/structures" class="sidebar-menu-link">
+            <i class="bi bi-diagram-3"></i>
+            <span>Fee Structures</span>
+        </a>
+
+        <a href="/admin/fees/collection" class="sidebar-menu-link">
+            <i class="bi bi-cash-coin"></i>
+            <span>Collect Fees</span>
+        </a>
+
+        <!-- <a href="/admin/fees/reports" class="sidebar-menu-link">
+            <i class="bi bi-bar-chart"></i>
+            <span>Fee Reports</span>
+        </a> -->
+
+
+        <!-- =========================
+             STUDENT ATTENDANCE
+        ========================= -->
+        <div class="sidebar-section-title">
+            Attendance
+        </div>
+
+        <!-- <a href="/admin/attendance/daily" class="sidebar-menu-link">
+            <i class="bi bi-calendar-plus"></i>
+            <span>Mark Daily Attendance</span>
+        </a> -->
+
+        <a href="/admin/attendance/monthly" class="sidebar-menu-link">
+            <i class="bi bi-calendar-range"></i>
+            <span>Monthly Report</span>
+        </a>
+
+
+        <!-- =========================
+             ACADEMIC OPERATIONS
+        ========================= -->
+        <div class="sidebar-section-title">
+            Academic Operations
+        </div>
+
+        <a href="/admin/results" class="sidebar-menu-link">
+            <i class="bi bi-file-earmark-bar-graph"></i>
+            <span>Results & Marksheets</span>
+        </a>
+
+        <a href="/admin/results/passed-students" class="sidebar-menu-link">
+            <i class="bi bi-award"></i>
+            <span>Pass (Certificates)</span>
+        </a>
+
+        <a href="/admin/results/promote" class="sidebar-menu-link">
+            <i class="bi bi-arrow-up-right-circle"></i>
+            <span>Semester Promotion</span>
+        </a>
+
+        <!-- <a href="/admin/examinations" class="sidebar-menu-link">
+            <i class="bi bi-journal-check"></i>
+            <span>Exam Management</span>
+        </a> -->
+
+
+        <!-- =========================
+             PAYROLL & ACCOUNTS
+        ========================= -->
+        <div class="sidebar-section-title">
+            Payroll & Accounts
+        </div>
+
+        <a href="/admin/accounts" class="sidebar-menu-link">
+            <i class="bi bi-bank"></i>
+            <span>Accounts Ledger</span>
+        </a>
+
+        <a href="/admin/salaries" class="sidebar-menu-link">
+            <i class="bi bi-wallet2"></i>
+            <span>Staff Salaries</span>
+        </a>
+
+        <!-- <a href="/admin/payroll/reports" class="sidebar-menu-link">
+            <i class="bi bi-bar-chart-line"></i>
+            <span>Payroll Reports</span>
+        </a> -->
+
+
+        <!-- =========================
+             CONFIGURATION
+        ========================= -->
+        <div class="sidebar-section-title">
+            Configuration
+        </div>
+
+        <a href="/admin/sessions" class="sidebar-menu-link">
+            <i class="bi bi-calendar-range"></i>
+            <span>Session Master</span>
+        </a>
+
+        <a href="/admin/courses" class="sidebar-menu-link">
+            <i class="bi bi-journal-bookmark"></i>
+            <span>Course Master</span>
+        </a>
+
+        <a href="/admin/semesters" class="sidebar-menu-link">
+            <i class="bi bi-layers"></i>
+            <span>Semester Master</span>
+        </a>
+
+        <a href="/admin/subjects" class="sidebar-menu-link">
+            <i class="bi bi-book"></i>
+            <span>Subject Master</span>
+        </a>
+
+        <a href="/admin/fees/types" class="sidebar-menu-link">
+            <i class="bi bi-tags"></i>
+            <span>Fee Types Master</span>
+        </a>
+
+    </div>
+
+
+    <!-- =========================
+         FIXED LOGOUT
+    ========================= -->
+    <div class="sidebar-logout">
+        <a href="/admin/login" class="btn btn-outline-danger w-100 btn-sm">
+            <i class="bi bi-box-arrow-left me-1"></i>
+            Logout
+        </a>
+    </div>
+
+</div>
+
+
+<!-- ================================
+    MAIN CONTENT
+================================ -->
+<div class="main-content w-100 bg-light min-vh-100">
+
+    <div class="topbar d-flex justify-content-between align-items-center p-3 bg-white shadow-sm mb-4 border-bottom">
+
+        <div>
+            <button class="btn btn-light border d-md-none me-2"
+                onclick="document.getElementById('sidebar').classList.toggle('show')">
+                <i class="bi bi-list"></i>
+            </button>
+
+            <h5 class="mb-0 d-none d-md-inline text-dark fw-bold">
+                Admin Portal
+            </h5>
+        </div>
+
+        <div>
+            <span class="text-secondary fw-bold px-3 py-1 bg-light rounded-pill border">
+                <i class="bi bi-person-circle text-primary me-1"></i>
+                <%= typeof adminName !=='undefined' ? adminName : 'Admin' %>
+            </span>
+        </div>
+
+    </div>
+
+
+    <!-- ================================
+        CONTENT AREA
+    ================================= -->
+    <div class="content-area px-4 pb-4">
+
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+
+                // Get current URL path
+                const currentPath = window.location.pathname
+                    .replace(/\/+$/, '') || '/';
+
+                // Get all sidebar links
+                const sidebarLinks = document.querySelectorAll(
+                    '.sidebar-menu a.sidebar-menu-link, .sidebar-menu a.list-group-item'
+                );
+
+                let exactMatch = null;
+
+                // First remove any existing active class
+                sidebarLinks.forEach(function (link) {
+                    link.classList.remove('active');
+
+                    const linkPath = new URL(link.href, window.location.origin)
+                        .pathname
+                        .replace(/\/+$/, '') || '/';
+
+                    // Exact URL match
+                    if (linkPath === currentPath && !exactMatch) {
+                        exactMatch = link;
+                    }
+                });
+
+                // Highlight only the matching/current tab
+                if (exactMatch) {
+                    exactMatch.classList.add('active');
+
+                    // Scroll active menu item into view if needed
+                    const sidebarMenu = document.querySelector('.sidebar-menu');
+
+                    if (sidebarMenu) {
+                        const menuTop = sidebarMenu.getBoundingClientRect().top;
+                        const menuBottom = sidebarMenu.getBoundingClientRect().bottom;
+
+                        const linkTop = exactMatch.getBoundingClientRect().top;
+                        const linkBottom = exactMatch.getBoundingClientRect().bottom;
+
+                        if (linkTop < menuTop || linkBottom > menuBottom) {
+                            exactMatch.scrollIntoView({
+                                block: 'nearest',
+                                behavior: 'smooth'
+                            });
+                        }
+                    }
+                }
+
+            });
+        </script>

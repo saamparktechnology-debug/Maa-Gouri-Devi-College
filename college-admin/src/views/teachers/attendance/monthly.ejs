@@ -1,0 +1,120 @@
+<%- include('../../partials/header') %>
+    <%- include('../../partials/sidebar') %>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0">Staff Monthly Attendance</h4>
+            <a href="/admin/teachers/attendance/daily" class="btn btn-outline-primary"><i
+                    class="bi bi-calendar-day"></i> Mark Daily</a>
+        </div>
+
+        <!-- Month & Year Filter -->
+        <div class="card border-0 shadow-sm mb-4 bg-light">
+            <div class="card-body">
+                <form action="/admin/teachers/attendance/monthly" method="GET" class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold text-muted small">Month</label>
+                        <select name="month" class="form-select">
+                            <% const months=["January", "February" , "March" , "April" , "May" , "June" , "July"
+                                , "August" , "September" , "October" , "November" , "December" ]; %>
+                                <% months.forEach((m, index)=> { %>
+                                    <option value="<%= index + 1 %>" <%=selectedMonth===index + 1 ? 'selected' : '' %>>
+                                        <%= m %>
+                                    </option>
+                                    <% }) %>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold text-muted small">Year</label>
+                        <select name="year" class="form-select">
+                            <% const currentYear=new Date().getFullYear(); %>
+                                <% for(let y=currentYear - 2; y <=currentYear + 1; y++) { %>
+                                    <option value="<%= y %>" <%=selectedYear===y ? 'selected' : '' %>><%= y %>
+                                    </option>
+                                    <% } %>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search"></i> View
+                            Report</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- The Attendance Matrix -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-0">
+                <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+                    <table class="table table-bordered table-hover align-middle mb-0 text-center"
+                        style="white-space: nowrap; font-size: 0.85rem;">
+                        <thead class="table-dark position-sticky top-0" style="z-index: 1;">
+                            <tr>
+                                <th class="text-start ps-3"
+                                    style="min-width: 200px; position: sticky; left: 0; z-index: 2; background-color: #212529;">
+                                    Teacher Name</th>
+                                <!-- Render days 1 to N -->
+                                <% for(let i=1; i <=daysInMonth; i++) { %>
+                                    <th style="min-width: 35px;">
+                                        <%= i %>
+                                    </th>
+                                    <% } %>
+                                        <th class="bg-success text-white">P</th>
+                                        <th class="bg-danger text-white">A</th>
+                                        <th class="bg-info text-dark">HD</th>
+                                        <th class="bg-warning text-dark">PL</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (teachers.length===0) { %>
+                                <tr>
+                                    <td colspan="<%= daysInMonth + 5 %>" class="py-4 text-muted">No teachers found.</td>
+                                </tr>
+                                <% } %>
+                                    <% teachers.forEach(teacher=> { %>
+                                        <tr>
+                                            <td class="text-start fw-bold ps-3 bg-white position-sticky shadow-sm"
+                                                style="left: 0; z-index: 1;">
+                                                <%= teacher.name %> <br>
+                                                    <small class="text-muted fw-normal">ID: #<%= teacher.id %></small>
+                                            </td>
+
+                                            <!-- Loop through each day of the month -->
+                                            <% for(let i=1; i <=daysInMonth; i++) { %>
+                                                <% const status=attendanceMap[teacher.id][i]; %>
+                                                    <td class="p-1">
+                                                        <% if (status==='Present' ) { %>
+                                                            <span class="text-success fw-bold">P</span>
+                                                            <% } else if (status==='Absent' ) { %>
+                                                                <span class="text-danger fw-bold">A</span>
+                                                                <% } else if (status==='Half-Day' ) { %>
+                                                                    <span class="text-info fw-bold">HD</span>
+                                                                    <% } else if (status==='Paid Leave' ) { %>
+                                                                        <span class="text-warning fw-bold">PL</span>
+                                                                        <% } else { %>
+                                                                            <span class="text-light">-</span>
+                                                                            <% } %>
+                                                    </td>
+                                                    <% } %>
+
+                                                        <!-- Summary Columns -->
+                                                        <td class="fw-bold text-success bg-light">
+                                                            <%= attendanceMap[teacher.id]['Present'] %>
+                                                        </td>
+                                                        <td class="fw-bold text-danger bg-light">
+                                                            <%= attendanceMap[teacher.id]['Absent'] %>
+                                                        </td>
+                                                        <td class="fw-bold text-info bg-light">
+                                                            <%= attendanceMap[teacher.id]['Half-Day'] %>
+                                                        </td>
+                                                        <td class="fw-bold text-warning bg-light">
+                                                            <%= attendanceMap[teacher.id]['Paid Leave'] %>
+                                                        </td>
+                                        </tr>
+                                        <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <%- include('../../partials/footer') %>

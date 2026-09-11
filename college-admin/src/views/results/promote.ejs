@@ -1,0 +1,139 @@
+<%- include('../partials/header') %>
+    <%- include('../partials/sidebar') %>
+
+        <div class="mb-4">
+            <h4 class="mb-0">Student Semester Promotion</h4>
+            <small class="text-muted">Promote students who have passed their current semester to the next
+                semester.</small>
+        </div>
+
+        <div class="card border-0 shadow-sm" style="max-width: 700px;">
+            <div class="card-body p-4">
+                <% if (typeof error !=='undefined' && error) { %>
+                    <div class="alert alert-danger">
+                        <%= error %>
+                    </div>
+                    <% } %>
+                        <% if (typeof success !=='undefined' && success) { %>
+                            <div class="alert alert-success">
+                                <%= success %>
+                            </div>
+                            <% } %>
+
+                                <form action="/admin/results/promote" method="POST">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Academic Session *</label>
+                                        <select name="session_id" class="form-select" required>
+                                            <option value="">Select Session...</option>
+                                            <% sessions.forEach(s=> { %>
+                                                <option value="<%= s.id %>">
+                                                    <%= s.session_name %>
+                                                </option>
+                                                <% }) %>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Course *</label>
+                                        <select name="course_id" id="courseSelect" class="form-select" required
+                                            onchange="filterSemesters()">
+                                            <option value="">Select Course...</option>
+                                            <% courses.forEach(c=> { %>
+                                                <option value="<%= c.id %>">
+                                                    <%= c.course_name %>
+                                                </option>
+                                                <% }) %>
+                                        </select>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label fw-bold">From Semester (Current) *</label>
+                                            <select name="from_semester_id" id="fromSemesterSelect" class="form-select"
+                                                required disabled>
+                                                <option value="">Select Course First...</option>
+                                                <% semesters.forEach(sem=> { %>
+                                                    <option value="<%= sem.id %>" data-course="<%= sem.course_id %>">
+                                                        <%= sem.semester_name %>
+                                                    </option>
+                                                    <% }) %>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label fw-bold">To Semester (Next) *</label>
+                                            <select name="to_semester_id" id="toSemesterSelect" class="form-select"
+                                                required disabled>
+                                                <option value="">Select Course First...</option>
+                                                <% semesters.forEach(sem=> { %>
+                                                    <option value="<%= sem.id %>" data-course="<%= sem.course_id %>">
+                                                        <%= sem.semester_name %>
+                                                    </option>
+                                                    <% }) %>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="alert alert-warning small">
+                                        <i class="bi bi-exclamation-triangle-fill"></i> <strong>Note:</strong> Only
+                                        students who have an official <strong>PASS</strong> status in the "From
+                                        Semester" will be promoted. Students with backlogs or pending results will
+                                        remain in the current semester.
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary w-100 fw-bold py-2">
+                                        <i class="bi bi-people-fill me-1"></i> Process Promotion for Passed Students
+                                    </button>
+                                </form>
+            </div>
+        </div>
+
+        <script>
+            function filterSemesters() {
+                const courseId = document.getElementById('courseSelect').value;
+                const fromSemSelect = document.getElementById('fromSemesterSelect');
+                const toSemSelect = document.getElementById('toSemesterSelect');
+
+                if (!courseId) {
+                    // Disable and reset if no course is selected
+                    fromSemSelect.disabled = true;
+                    toSemSelect.disabled = true;
+                    fromSemSelect.value = '';
+                    toSemSelect.value = '';
+                    fromSemSelect.querySelector('option').textContent = "Select Course First...";
+                    toSemSelect.querySelector('option').textContent = "Select Course First...";
+                    return;
+                }
+
+                // Enable dropdowns once a course is chosen
+                fromSemSelect.disabled = false;
+                toSemSelect.disabled = false;
+                fromSemSelect.querySelector('option').textContent = "Select Semester...";
+                toSemSelect.querySelector('option').textContent = "Select Semester...";
+
+                // Filter options for both dropdowns
+                [fromSemSelect, toSemSelect].forEach(semSelect => {
+                    semSelect.value = ''; // Reset selection
+                    const options = semSelect.querySelectorAll('option');
+
+                    options.forEach(opt => {
+                        if (opt.value === "") return;
+                        if (opt.getAttribute('data-course') === courseId) {
+                            opt.style.display = 'block';
+                        } else {
+                            opt.style.display = 'none';
+                        }
+                    });
+                });
+            }
+
+            // Run on load in case of form validation errors re-rendering the page
+            window.addEventListener('DOMContentLoaded', () => {
+                const courseSelect = document.getElementById('courseSelect');
+                if (courseSelect.value) {
+                    filterSemesters();
+                }
+            });
+        </script>
+
+        <%- include('../partials/footer') %>

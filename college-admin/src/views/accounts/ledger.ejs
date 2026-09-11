@@ -1,0 +1,286 @@
+<%- include('../partials/header') %>
+    <%- include('../partials/sidebar') %>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0">Accounts Ledger</h4>
+            <div>
+                <button class="btn btn-outline-secondary me-2" data-bs-toggle="modal" data-bs-target="#categoryModal">
+                    <i class="bi bi-tags"></i> Categories
+                </button>
+                <button class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#transactionModal"
+                    onclick="setTxType('INCOME')">
+                    <i class="bi bi-arrow-down-circle"></i> Add Income
+                </button>
+                <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#transactionModal"
+                    onclick="setTxType('EXPENSE')">
+                    <i class="bi bi-arrow-up-circle"></i> Add Expense
+                </button>
+            </div>
+        </div>
+
+        <!-- Financial Summary Cards -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm bg-success text-white">
+                    <div class="card-body">
+                        <h6>Total Income</h6>
+                        <h3>₹ <%= totalIncome.toFixed(2) %>
+                        </h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm bg-danger text-white">
+                    <div class="card-body">
+                        <h6>Total Expense</h6>
+                        <h3>₹ <%= totalExpense.toFixed(2) %>
+                        </h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div
+                    class="card border-0 shadow-sm <%= currentBalance >= 0 ? 'bg-primary' : 'bg-warning text-dark' %> text-white">
+                    <div class="card-body">
+                        <h6>Current Balance</h6>
+                        <h3>₹ <%= currentBalance.toFixed(2) %>
+                        </h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Advanced Filters -->
+        <div class="card border-0 shadow-sm mb-4 bg-light">
+            <div class="card-body">
+                <form action="/admin/accounts" method="GET" class="row g-3 align-items-end">
+                    <% const today=new Date().toISOString().split('T')[0]; %>
+
+                        <div class="col-md-3">
+                            <label class="form-label text-muted small fw-bold">Start Date</label>
+                            <input type="date" name="start_date" class="form-control"
+                                value="<%= typeof filters !== 'undefined' && filters.start_date ? filters.start_date : today %>">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label text-muted small fw-bold">End Date</label>
+                            <input type="date" name="end_date" class="form-control"
+                                value="<%= typeof filters !== 'undefined' && filters.end_date ? filters.end_date : today %>">
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="form-label text-muted small fw-bold">Transaction Type</label>
+                            <select name="type" class="form-select">
+                                <option value="">All Types</option>
+                                <option value="INCOME" <%=typeof filters !=='undefined' && filters.type==='INCOME'
+                                    ? 'selected' : '' %>>Income</option>
+                                <option value="EXPENSE" <%=typeof filters !=='undefined' && filters.type==='EXPENSE'
+                                    ? 'selected' : '' %>>Expense</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label text-muted small fw-bold">Category</label>
+                            <select name="category_id" class="form-select">
+                                <option value="">All Categories</option>
+                                <% categories.forEach(c=> { %>
+                                    <option value="<%= c.id %>" <%=typeof filters !=='undefined' &&
+                                        filters.category_id==c.id ? 'selected' : '' %>><%= c.name %>
+                                    </option>
+                                    <% }) %>
+                            </select>
+                        </div>
+                        <div class="col-md-1">
+                            <button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel"></i></button>
+                        </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Ledger Table -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Category</th>
+                                <th>Amount (₹)</th>
+                                <th>Method & Ref</th>
+                                <th>Description</th>
+                                <th>Receipt</th>
+                                <th>Recorded By</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if(transactions.length===0) { %>
+                                <tr>
+                                    <td colspan="8" class="text-center py-4 text-muted">No transactions match your
+                                        criteria.</td>
+                                </tr>
+                                <% } else { %>
+                                    <% transactions.forEach(t=> { %>
+                                        <tr>
+                                            <td class="fw-bold">
+                                                <%= t.transaction_date %>
+                                            </td>
+                                            <td>
+                                                <span
+                                                    class="badge <%= t.transaction_type === 'INCOME' ? 'bg-success' : 'bg-danger' %>">
+                                                    <%= t.transaction_type %>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <%= t.AccountCategory ? t.AccountCategory.name : 'N/A' %>
+                                            </td>
+                                            <td
+                                                class="fw-bold <%= t.transaction_type === 'INCOME' ? 'text-success' : 'text-danger' %>">
+                                                <%= t.transaction_type==='INCOME' ? '+' : '-' %>
+                                                    <%= parseFloat(t.amount).toFixed(2) %>
+                                            </td>
+                                            <td>
+                                                <small>
+                                                    <%= t.payment_method %><br>
+                                                        <span class="text-muted">
+                                                            <%= t.reference || 'N/A' %>
+                                                        </span>
+                                                </small>
+                                            </td>
+                                            <td><small>
+                                                    <%= t.description || 'Auto-generated' %>
+                                                </small></td>
+                                            <td>
+                                                <% if (t.receipt_file_path) { %>
+                                                    <a href="/admin/accounts/receipt/<%= t.id %>" target="_blank"
+                                                        class="btn btn-sm btn-outline-info" title="View Receipt">
+                                                        <i class="bi bi-paperclip"></i> View
+                                                    </a>
+                                                    <% } else { %>
+                                                        <span class="text-muted small">None</span>
+                                                        <% } %>
+                                            </td>
+                                            <td><small><i class="bi bi-person"></i>
+                                                    <%= t.Admin ? t.Admin.name : 'System' %>
+                                                </small></td>
+                                        </tr>
+                                        <% }) %>
+                                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transaction Modal with File Upload Support -->
+        <div class="modal fade" id="transactionModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form action="/admin/accounts/transaction" method="POST" enctype="multipart/form-data">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="txModalTitle">Add Transaction</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" name="transaction_type" id="modalTxType">
+                            <div class="mb-3">
+                                <label>Category *</label>
+                                <select name="category_id" id="modalCategory" class="form-select" required>
+                                    <option value="">Select...</option>
+                                    <% categories.forEach(c=> { %>
+                                        <option value="<%= c.id %>" data-type="<%= c.type %>">
+                                            <%= c.name %>
+                                        </option>
+                                        <% }) %>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label>Amount (₹) *</label>
+                                <input type="number" step="0.01" name="amount" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label>Date *</label>
+                                <input type="date" name="transaction_date" class="form-control" id="todayDate" required>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label>Method</label>
+                                    <select name="payment_method" class="form-select">
+                                        <option>Cash</option>
+                                        <option>Bank Transfer</option>
+                                        <option>UPI</option>
+                                        <option>Cheque</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label>Reference</label>
+                                    <input type="text" name="reference" class="form-control">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label>Attach Receipt / Bill (Optional)</label>
+                                <input type="file" name="receipt" class="form-control" accept=".jpg,.jpeg,.png,.pdf">
+                            </div>
+                            <div class="mb-3">
+                                <label>Description</label>
+                                <textarea name="description" class="form-control" rows="2"></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer bg-light">
+                            <button type="submit" class="btn btn-primary">Save Transaction</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Modal -->
+        <div class="modal fade" id="categoryModal" tabindex="-1">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <form action="/admin/accounts/category" method="POST">
+                        <div class="modal-header">
+                            <h5 class="modal-title">New Category</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label>Category Name *</label>
+                                <input type="text" name="name" class="form-control" required
+                                    placeholder="e.g. Electricity Bill">
+                            </div>
+                            <div class="mb-3">
+                                <label>Type *</label>
+                                <select name="type" class="form-select">
+                                    <option value="EXPENSE">Expense</option>
+                                    <option value="INCOME">Income</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary w-100">Add</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            document.getElementById('todayDate').valueAsDate = new Date();
+
+            function setTxType(type) {
+                document.getElementById('modalTxType').value = type;
+                document.getElementById('txModalTitle').innerText = type === 'INCOME' ? 'Record Income' : 'Record Expense';
+
+                const catSelect = document.getElementById('modalCategory');
+                const options = catSelect.querySelectorAll('option');
+                catSelect.value = '';
+                options.forEach(opt => {
+                    if (opt.value === "") return;
+                    if (opt.getAttribute('data-type') === type) opt.style.display = 'block';
+                    else opt.style.display = 'none';
+                });
+            }
+        </script>
+
+        <%- include('../partials/footer') %>

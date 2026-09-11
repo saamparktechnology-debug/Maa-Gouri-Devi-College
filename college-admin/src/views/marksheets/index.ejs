@@ -1,0 +1,129 @@
+<%- include('../partials/header') %>
+    <%- include('../partials/sidebar') %>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0">Session-Wise Consolidated Marksheets</h4>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadMarksheetModal">
+                <i class="bi bi-upload"></i> Upload Marksheets PDF
+            </button>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Title</th>
+                                <th>Course</th>
+                                <th>Session</th>
+                                <th>Semester</th>
+                                <th>Uploaded Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (marksheets.length===0) { %>
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted py-4">No consolidated marksheets
+                                        uploaded yet.</td>
+                                </tr>
+                                <% } else { %>
+                                    <% marksheets.forEach(m=> { %>
+                                        <tr>
+                                            <td class="fw-bold text-primary">
+                                                <%= m.title %>
+                                            </td>
+                                            <td>
+                                                <%= m.Course ? m.Course.course_name : 'N/A' %>
+                                            </td>
+                                            <td>
+                                                <%= m.Session ? m.Session.session_name : 'N/A' %>
+                                            </td>
+                                            <td>
+                                                <%= m.Semester ? m.Semester.semester_name : 'N/A' %>
+                                            </td>
+                                            <td>
+                                                <%= new Date(m.uploaded_at).toLocaleDateString() %>
+                                            </td>
+                                            <td>
+                                                <a href="/admin/marksheets/view/<%= m.id %>" target="_blank"
+                                                    class="btn btn-sm btn-outline-primary" title="View PDF">
+                                                    <i class="bi bi-eye"></i> View PDF
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        <% }) %>
+                                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upload Modal -->
+        <div class="modal fade" id="uploadMarksheetModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content border-0 shadow-lg">
+                    <form action="/admin/marksheets" method="POST" enctype="multipart/form-data">
+                        <div class="modal-header bg-light">
+                            <h5 class="modal-title fw-bold text-primary"><i
+                                    class="bi bi-file-earmark-pdf me-2"></i>Upload Session Marksheets</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label">Document Title *</label>
+                                <input type="text" name="title" class="form-control"
+                                    placeholder="e.g., B.Ed Sem 1 Final Marksheets 2025-27" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Course *</label>
+                                <select name="course_id" class="form-select" required>
+                                    <option value="">Select Course...</option>
+                                    <% courses.forEach(c=> { %>
+                                        <option value="<%= c.id %>">
+                                            <%= c.course_name %>
+                                        </option>
+                                        <% }) %>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Session *</label>
+                                <select name="session_id" class="form-select" required>
+                                    <option value="">Select Session...</option>
+                                    <% sessions.forEach(s=> { %>
+                                        <option value="<%= s.id %>">
+                                            <%= s.session_name %>
+                                        </option>
+                                        <% }) %>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Semester *</label>
+                                <select name="semester_id" class="form-select" required>
+                                    <option value="">Select Semester...</option>
+                                    <% semesters.forEach(sem=> { %>
+                                        <option value="<%= sem.id %>">
+                                            <%= sem.semester_name %>
+                                        </option>
+                                        <% }) %>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Consolidated PDF File * (Max 5MB)</label>
+                                <input type="file" name="marksheet_pdf" class="form-control" accept=".pdf" required>
+                            </div>
+                        </div>
+                        <div class="modal-footer bg-light">
+                            <button type="button" class="btn btn-outline-secondary"
+                                data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary"><i class="bi bi-upload me-1"></i> Upload
+                                Marksheet</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <%- include('../partials/footer') %>

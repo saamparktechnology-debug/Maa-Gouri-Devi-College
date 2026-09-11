@@ -1,0 +1,173 @@
+<%- include('../partials/header') %>
+    <%- include('../partials/sidebar') %>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0">Daily Attendance</h4>
+        </div>
+
+        <!-- Filter Form -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <form action="/admin/attendance/daily" method="GET" class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label">Session</label>
+                        <select name="session_id" class="form-select" required>
+                            <option value="">Select...</option>
+                            <% sessions.forEach(s=> { %>
+                                <option value="<%= s.id %>" <%=(typeof selectedSession !=='undefined' &&
+                                    selectedSession==s.id) ? 'selected' : '' %>><%= s.session_name %>
+                                </option>
+                                <% }) %>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Course</label>
+                        <select name="course_id" class="form-select" required>
+                            <option value="">Select...</option>
+                            <% courses.forEach(c=> { %>
+                                <option value="<%= c.id %>" <%=(typeof selectedCourse !=='undefined' &&
+                                    selectedCourse==c.id) ? 'selected' : '' %>><%= c.course_name %>
+                                </option>
+                                <% }) %>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Semester</label>
+                        <select name="semester_id" class="form-select" required>
+                            <option value="">Select...</option>
+                            <% semesters.forEach(sem=> { %>
+                                <option value="<%= sem.id %>" <%=(typeof selectedSemester !=='undefined' &&
+                                    selectedSemester==sem.id) ? 'selected' : '' %>><%= sem.semester_name %>
+                                </option>
+                                <% }) %>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Date</label>
+                        <input type="date" name="date" class="form-control"
+                            value="<%= typeof date !== 'undefined' ? date : '' %>" required>
+                    </div>
+                    <div class="col-md-1">
+                        <button type="submit" class="btn btn-primary w-100">Filter</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Attendance Marking Table -->
+        <% if (typeof students !=='undefined' && students.length> 0) { %>
+            <form action="/admin/attendance/daily" method="POST">
+                <!-- Hidden fields to pass context back to POST -->
+                <input type="hidden" name="session_id" value="<%= selectedSession %>">
+                <input type="hidden" name="course_id" value="<%= selectedCourse %>">
+                <input type="hidden" name="semester_id" value="<%= selectedSemester %>">
+                <input type="hidden" name="date" value="<%= date %>">
+
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white">
+                        <h6 class="mb-0 text-primary">Mark Attendance for <%= date %>
+                        </h6>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-3">Admission No</th>
+                                        <th>Student Name</th>
+                                        <th>Status</th>
+                                        <th>Remarks</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% students.forEach(student=> { %>
+                                        <tr>
+                                            <td class="ps-3">
+                                                <%= student.admission_no %>
+                                            </td>
+                                            <td class="fw-bold">
+                                                <%= student.first_name %>
+                                                    <%= student.last_name %>
+                                            </td>
+                                            <td>
+                                                <input type="hidden" name="attendance[<%= student.id %>][student_id]"
+                                                    value="<%= student.id %>">
+
+                                                <div class="btn-group" role="group">
+                                                    <input type="radio" class="btn-check"
+                                                        name="attendance[<%= student.id %>][status]"
+                                                        id="present_<%= student.id %>" value="Present" checked>
+                                                    <label class="btn btn-outline-success btn-sm"
+                                                        for="present_<%= student.id %>">P</label>
+
+                                                    <input type="radio" class="btn-check"
+                                                        name="attendance[<%= student.id %>][status]"
+                                                        id="absent_<%= student.id %>" value="Absent">
+                                                    <label class="btn btn-outline-danger btn-sm"
+                                                        for="absent_<%= student.id %>">A</label>
+
+                                                    <input type="radio" class="btn-check"
+                                                        name="attendance[<%= student.id %>][status]"
+                                                        id="leave_<%= student.id %>" value="Leave">
+                                                    <label class="btn btn-outline-warning btn-sm"
+                                                        for="leave_<%= student.id %>">L</label>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <input type="text" name="attendance[<%= student.id %>][remarks]"
+                                                    class="form-control form-control-sm" placeholder="Optional notes">
+                                            </td>
+                                        </tr>
+                                        <% }) %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-light text-end">
+                        <button type="submit" class="btn btn-primary">Save Attendance</button>
+                    </div>
+                </div>
+            </form>
+            <% } else if (typeof students !=='undefined' && students.length===0) { %>
+                <div class="alert alert-info text-center border-0 shadow-sm">No students found for this combination.
+                </div>
+                <% } %>
+
+                    <!-- Success Modal -->
+                    <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content border-0 shadow">
+                                <div class="modal-body text-center p-4">
+                                    <div class="mb-3">
+                                        <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
+                                    </div>
+                                    <h5 class="fw-bold mb-2">Saved Successfully!</h5>
+                                    <p class="text-muted mb-4">The student attendance has been recorded.</p>
+                                    <button type="button" class="btn btn-success px-4"
+                                        data-bs-dismiss="modal">OK</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hidden Trigger Button for Bootstrap Safe Launch -->
+                    <button type="button" id="triggerModalBtn" class="d-none" data-bs-toggle="modal"
+                        data-bs-target="#successModal"></button>
+
+                    <script>
+                        document.addEventListener("DOMContentLoaded", function () {
+                            const urlParams = new URLSearchParams(window.location.search);
+                            if (urlParams.has('success')) {
+                                // Safely trigger the modal using Bootstrap's data attributes
+                                document.getElementById('triggerModalBtn').click();
+
+                                // Clean URL parameters without page refresh
+                                urlParams.delete('success');
+                                const cleanQuery = urlParams.toString();
+                                const newUrl = window.location.pathname + (cleanQuery ? '?' + cleanQuery : '');
+                                window.history.replaceState({}, document.title, newUrl);
+                            }
+                        });
+                    </script>
+
+                    <%- include('../partials/footer') %>

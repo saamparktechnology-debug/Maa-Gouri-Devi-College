@@ -1,0 +1,212 @@
+<%- include('../partials/header') %>
+    <%- include('../partials/sidebar') %>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0">Student Directory</h4>
+            <a href="/admin/students/create" class="btn btn-primary">
+                <i class="bi bi-person-plus"></i> New Admission
+            </a>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+
+                <!-- THE UPGRADE: 4-Part Real-time Filters -->
+                <div class="row mb-4">
+                    <div class="col-md-3 mb-2">
+                        <input type="text" id="searchInput" class="form-control"
+                            placeholder="🔍 Search Adm No, Name, Mobile...">
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <select id="filterCourse" class="form-select">
+                            <option value="">All Courses</option>
+                            <!-- Options auto-populated by JS below -->
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <select id="filterSession" class="form-select">
+                            <option value="">All Sessions</option>
+                            <!-- Options auto-populated by JS below -->
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <select id="filterStatus" class="form-select">
+                            <option value="">All Statuses</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                            <option value="alumni">Alumni</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle" id="studentTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Adm No.</th>
+                                <th>Name</th>
+                                <th>Course</th>
+                                <th>Session</th>
+                                <th>Mobile</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (students.length===0) { %>
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted py-4">No students found.</td>
+                                </tr>
+                                <% } %>
+                                    <% students.forEach(s=> { %>
+                                        <tr>
+                                            <td class="fw-bold text-primary">
+                                                <%= s.admission_no %>
+                                            </td>
+                                            <td>
+                                                <%= s.first_name %>
+                                                    <%= s.last_name %>
+                                            </td>
+                                            <td>
+                                                <%= s.Course ? s.Course.course_name : 'N/A' %>
+                                            </td>
+                                            <td>
+                                                <!-- Using AcademicSession -->
+                                                <%= s.AcademicSession ? s.AcademicSession.session_name : 'N/A' %>
+                                            </td>
+                                            <td>
+                                                <%= s.mobile %>
+                                            </td>
+                                            <td>
+                                                <span
+                                                    class="badge <%= s.status === 'Active' ? 'bg-success' : (s.status === 'Alumni' ? 'bg-info' : 'bg-secondary') %>">
+                                                    <%= s.status %>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <a href="/admin/students/<%= s.id %>"
+                                                    class="btn btn-sm btn-light border text-primary"
+                                                    title="View Profile">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                <a href="/admin/students/<%= s.id %>/edit"
+                                                    class="btn btn-sm btn-light border text-secondary"
+                                                    title="Edit Student">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-light border text-success"
+                                                    title="Print ID Card" onclick="printStudentId('<%= s.id %>')">
+                                                    <i class="bi bi-printer"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <% }) %>
+                                            <!-- Fallback row for empty search results -->
+                                            <tr id="noResultsRow" style="display: none;">
+                                                <td colspan="7" class="text-center text-muted py-4">No students match
+                                                    your filters.</td>
+                                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Real-Time Filter Engine -->
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const searchInput = document.getElementById("searchInput");
+                const filterCourse = document.getElementById("filterCourse");
+                const filterSession = document.getElementById("filterSession");
+                const filterStatus = document.getElementById("filterStatus");
+                const tableRows = document.querySelectorAll("#studentTable tbody tr:not(#noResultsRow)");
+                const noResultsRow = document.getElementById("noResultsRow");
+
+                // 1. Auto-Populate Course and Session Dropdowns dynamically from the table data
+                const uniqueCourses = new Set();
+                const uniqueSessions = new Set();
+
+                tableRows.forEach(row => {
+                    // Ensure we skip the "No students found" row if array is empty
+                    if (row.cells.length < 7) return;
+
+                    const courseText = row.cells[2].innerText.trim();
+                    const sessionText = row.cells[3].innerText.trim();
+
+                    if (courseText && courseText !== 'N/A') uniqueCourses.add(courseText);
+                    if (sessionText && sessionText !== 'N/A') uniqueSessions.add(sessionText);
+                });
+
+                uniqueCourses.forEach(c => filterCourse.add(new Option(c, c.toLowerCase())));
+                uniqueSessions.forEach(s => filterSession.add(new Option(s, s.toLowerCase())));
+
+                // 2. The Filter Logic
+                function filterTable() {
+                    const query = searchInput.value.toLowerCase().trim();
+                    const course = filterCourse.value.toLowerCase().trim();
+                    const session = filterSession.value.toLowerCase().trim();
+                    const status = filterStatus.value.toLowerCase().trim();
+
+                    let visibleCount = 0;
+
+                    tableRows.forEach(row => {
+                        if (row.cells.length < 7) return; // Skip empty fallback rows
+
+                        const rowText = row.innerText.toLowerCase();
+                        const rowCourse = row.cells[2].innerText.toLowerCase().trim();
+                        const rowSession = row.cells[3].innerText.toLowerCase().trim();
+                        const rowStatus = row.cells[5].innerText.toLowerCase().trim();
+
+                        // Check matches
+                        const matchesSearch = query === "" || rowText.includes(query);
+                        const matchesCourse = course === "" || rowCourse === course;
+                        const matchesSession = session === "" || rowSession === session;
+                        const matchesStatus = status === "" || rowStatus === status;
+
+                        if (matchesSearch && matchesCourse && matchesSession && matchesStatus) {
+                            row.style.display = "";
+                            visibleCount++;
+                        } else {
+                            row.style.display = "none";
+                        }
+                    });
+
+                    // Show "No Results" message if everything is filtered out
+                    if (noResultsRow) {
+                        noResultsRow.style.display = visibleCount === 0 ? "" : "none";
+                    }
+                }
+
+                // 3. Attach Event Listeners
+                searchInput.addEventListener("keyup", filterTable);
+                filterCourse.addEventListener("change", filterTable);
+                filterSession.addEventListener("change", filterTable);
+                filterStatus.addEventListener("change", filterTable);
+            });
+        </script>
+
+
+
+        <script>
+            async function printStudentId(studentId) {
+                try {
+                    const response = await fetch(`/admin/students/${studentId}/id-card`);
+                    const htmlText = await response.text();
+
+                    const printWindow = window.open('', '', 'height=700,width=600');
+                    printWindow.document.write(htmlText);
+                    printWindow.document.close();
+                    printWindow.focus();
+
+                    setTimeout(() => {
+                        printWindow.print();
+                        printWindow.close();
+                    }, 600);
+                } catch (error) {
+                    console.error("Error opening ID card:", error);
+                    alert("Failed to load ID card for printing.");
+                }
+            }
+        </script>
+
+        <%- include('../partials/footer') %>

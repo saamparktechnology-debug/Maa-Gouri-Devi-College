@@ -1,0 +1,84 @@
+<%- include('../partials/header') %>
+    <%- include('../partials/sidebar') %>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0">Marks Entry</h4>
+            <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm"><i
+                    class="bi bi-arrow-left"></i> Back</a>
+        </div>
+
+        <div class="card border-0 shadow-sm mb-4 bg-light">
+            <div class="card-body row fw-bold">
+                <div class="col-md-3 text-secondary">Student: <span class="text-dark">
+                        <%= student.first_name %>
+                            <%= student.last_name %>
+                    </span></div>
+                <div class="col-md-3 text-secondary">Adm No: <span class="text-dark">
+                        <%= student.admission_no %>
+                    </span></div>
+                <div class="col-md-3 text-secondary">Course: <span class="text-dark">
+                        <%= student.Course.course_name %>
+                    </span></div>
+                <div class="col-md-3 text-secondary">Semester: <span class="text-dark">
+                        <%= student.Semester.semester_name %>
+                    </span></div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <form action="/admin/results/entry/<%= student.id %>" method="POST">
+                    <table class="table table-bordered align-middle text-center">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="text-start">Subject Code & Name</th>
+                                <th>Max Marks</th>
+                                <th>Passing Marks</th>
+                                <th style="width: 200px;">Marks Obtained *</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if(subjects.length===0) { %>
+                                <tr>
+                                    <td colspan="4" class="text-muted py-4">No active subjects found for this semester.
+                                        Add subjects in Master first.</td>
+                                </tr>
+                                <% } %>
+                                    <% subjects.forEach(sub=> {
+                                        let existingVal = '';
+                                        if (existingResult) {
+                                        const match = existingResult.ResultSubjectMarks.find(m => m.subject_id ===
+                                        sub.id);
+                                        if (match) existingVal = match.obtained_marks;
+                                        }
+                                        %>
+                                        <tr>
+                                            <td class="text-start fw-bold">
+                                                <%= sub.subject_code %> - <%= sub.subject_name %>
+                                            </td>
+                                            <td>
+                                                <%= sub.max_marks %>
+                                            </td>
+                                            <td class="text-danger">
+                                                <%= sub.passing_marks %>
+                                            </td>
+                                            <td>
+                                                <input type="number" name="marks[<%= sub.id %>]"
+                                                    class="form-control text-center fw-bold" value="<%= existingVal %>"
+                                                    max="<%= sub.max_marks %>" min="0" required>
+                                            </td>
+                                        </tr>
+                                        <% }) %>
+                        </tbody>
+                    </table>
+                    <% if(subjects.length> 0) { %>
+                        <div class="text-end mt-4">
+                            <button type="submit" class="btn btn-primary px-5 btn-lg"><i class="bi bi-calculator"></i>
+                                Save & Calculate Result</button>
+                        </div>
+                        <% } %>
+                </form>
+            </div>
+        </div>
+
+        <%- include('../partials/footer') %>

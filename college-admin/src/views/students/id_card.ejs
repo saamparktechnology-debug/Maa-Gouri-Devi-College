@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student ID Card - <%= student.admission_no %>
+    </title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --navy: #173b82;
+            --navy-dark: #0b2454;
+            --blue: #2457b8;
+            --gold: #c99332;
+            --ink: #152033;
+            --muted: #64748b;
+            --line: #dbe3ef;
+            --soft: #f5f8fc;
+            --green: #15905d;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 28px;
+            background:
+                radial-gradient(circle at 20% 15%, rgba(36, 87, 184, .12), transparent 28%),
+                radial-gradient(circle at 85% 85%, rgba(201, 147, 50, .12), transparent 25%),
+                #e9eef5;
+            color: var(--ink);
+            font-family: Inter, "Segoe UI", sans-serif;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .print-button {
+            position: fixed;
+            top: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 0;
+            border-radius: 999px;
+            padding: 11px 20px;
+            color: white;
+            background: linear-gradient(135deg, var(--navy), var(--blue));
+            box-shadow: 0 8px 22px rgba(23, 59, 130, .25);
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .id-card-container {
+            width: 430px;
+            height: 680px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(23, 59, 130, .22);
+            border-radius: 24px;
+            background: #fff;
+            box-shadow: 0 24px 60px rgba(15, 35, 70, .22), 0 3px 10px rgba(15, 35, 70, .08);
+        }
+
+        .id-card-container::before {
+            content: "";
+            position: absolute;
+            z-index: 0;
+            width: 280px;
+            height: 280px;
+            right: -115px;
+            top: 130px;
+            border: 1px solid rgba(36, 87, 184, .08);
+            border-radius: 50%;
+            box-shadow: 0 0 0 25px rgba(36, 87, 184, .025), 0 0 0 50px rgba(36, 87, 184, .025);
+            pointer-events: none;
+        }
+
+        .card-header {
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+            color: white;
+            background: linear-gradient(135deg, var(--navy-dark), var(--navy) 65%, #2b64c6);
+        }
+
+        .card-header::after {
+            content: "";
+            position: absolute;
+            width: 250px;
+            height: 240px;
+            top: -170px;
+            right: -70px;
+            border: 1px solid rgba(255, 255, 255, .18);
+            border-radius: 50%;
+            box-shadow: 0 0 0 20px rgba(255, 255, 255, .035), 0 0 0 40px rgba(255, 255, 255, .035);
+        }
+
+        .header-content {
+            padding: 14px 28px 18px;
+        }
+
+        .brand-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .college-logo {
+            width: 68px;
+            height: 68px;
+            flex: 0 0 auto;
+            object-fit: contain;
+            padding: 4px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, .96);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, .18);
+        }
+
+        .college-name {
+            margin: 0;
+            font-size: 22px;
+            line-height: 1.03;
+            letter-spacing: .4px;
+            font-weight: 900;
+            white-space: nowrap;
+        }
+
+        .college-subtitle {
+            margin-top: 5px;
+            color: #dce8ff;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.3px;
+        }
+
+        .est-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 1px;
+        }
+
+        .est-row::before,
+        .est-row::after {
+            content: "";
+            height: 1px;
+            flex: 1;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .72));
+        }
+
+        .est-row::after {
+            transform: rotate(180deg);
+        }
+
+        .est-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            min-width: 106px;
+            padding: 7px 10px;
+            border: 1px solid rgba(255, 237, 187, .72);
+            border-radius: 999px;
+            color: #fff8e8;
+            background: linear-gradient(135deg,
+                    rgba(201, 147, 50, .96),
+                    rgba(161, 105, 20, .96));
+            box-shadow:
+                0 4px 10px rgba(0, 0, 0, .18),
+                inset 0 1px 0 rgba(255, 255, 255, .28);
+            font-size: 8px;
+            font-weight: 700;
+            letter-spacing: 1.1px;
+            line-height: 1;
+        }
+
+        .est-badge i {
+            color: #fff3cf;
+            font-size: 10px;
+        }
+
+        .location-bar {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: center;
+            gap: 7px;
+            padding: 10px 20px;
+            color: #eef4ff;
+            background: rgba(5, 24, 59, .34);
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: .45px;
+            text-transform: uppercase;
+        }
+
+        .location-bar i {
+            color: #f5c558;
+        }
+
+        .institution-strip {
+            padding: 8px 20px;
+            color: #53657f;
+            background: #f7faff;
+            border-bottom: 1px solid var(--line);
+            text-align: center;
+            font-size: 8px;
+            line-height: 1.5;
+        }
+
+        .institution-strip a {
+            color: var(--navy);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .card-body-section {
+            position: relative;
+            z-index: 1;
+            flex: 1;
+            padding: 22px 28px 16px;
+            text-align: center;
+        }
+
+        .photo-wrap {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 12px;
+        }
+
+        .student-photo-frame {
+            width: 128px;
+            height: 145px;
+            overflow: hidden;
+            border: 5px solid white;
+            border-radius: 18px;
+            background: #edf2f8;
+            box-shadow: 0 0 0 2px var(--navy), 0 10px 22px rgba(23, 59, 130, .2);
+        }
+
+        .student-photo-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .student-photo-frame .no-photo {
+            height: 100%;
+            display: grid;
+            place-items: center;
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .photo-wrap::after {
+            content: "✓";
+            position: absolute;
+            right: -9px;
+            bottom: -7px;
+            width: 28px;
+            height: 28px;
+            display: grid;
+            place-items: center;
+            border: 3px solid white;
+            border-radius: 50%;
+            color: white;
+            background: var(--green);
+            font-size: 15px;
+            font-weight: 900;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, .16);
+        }
+
+        .student-name {
+            overflow: hidden;
+            margin: 0 auto 8px;
+            color: var(--navy);
+            font-size: 20px;
+            font-weight: 900;
+            letter-spacing: .5px;
+            text-transform: uppercase;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .student-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 20px;
+            padding: 7px 13px;
+            border-radius: 999px;
+            color: white;
+            background: linear-gradient(135deg, #118150, #20a46d);
+            box-shadow: 0 5px 12px rgba(21, 144, 93, .2);
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: .65px;
+            text-transform: uppercase;
+        }
+
+        .student-status-badge::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #b9ffdc;
+        }
+
+        .info-container {
+            overflow: hidden;
+            width: 100%;
+            border: 1px solid var(--line);
+            border-radius: 15px;
+            background: rgba(247, 250, 255, .86);
+            box-shadow: 0 7px 18px rgba(34, 65, 110, .06);
+            text-align: left;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 11px 15px;
+            border-bottom: 1px solid #e5ebf4;
+            font-size: 11px;
+        }
+
+        .info-row:last-child {
+            border-bottom: 0;
+        }
+
+        .info-label {
+            color: #64748b;
+            font-weight: 700;
+        }
+
+        .info-value {
+            max-width: 215px;
+            overflow: hidden;
+            color: var(--ink);
+            font-weight: 800;
+            text-align: right;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .info-value.text-primary {
+            color: var(--blue);
+        }
+
+        .card-footer-banner {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            padding: 14px 28px 17px;
+            border-top: 1px solid var(--line);
+            background: #f7faff;
+        }
+
+        .issued {
+            color: var(--muted);
+            font-size: 10px;
+            line-height: 1.8;
+        }
+
+        .secure-id {
+            color: var(--navy);
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: 1.3px;
+        }
+
+        .signature-line {
+            width: 112px;
+            padding-top: 6px;
+            border-top: 1px solid #475569;
+            color: #334155;
+            font-size: 10px;
+            font-weight: 800;
+            text-align: center;
+        }
+
+        @media (max-width: 500px) {
+            body {
+                padding: 15px;
+            }
+
+            .id-card-container {
+                transform: scale(.82);
+                transform-origin: center;
+                margin: -61px 0;
+            }
+
+            .print-button {
+                top: 8px;
+            }
+        }
+
+        @media print {
+            body {
+                min-height: auto;
+                padding: 0;
+                background: transparent;
+            }
+
+            .print-button {
+                display: none;
+            }
+
+            .id-card-container {
+                margin: 0 auto;
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <button onclick="window.print()" class="print-button">
+        <i class="bi bi-printer-fill"></i>&nbsp; Print / Save ID Card
+    </button>
+
+    <main class="id-card-container">
+        <header class="card-header">
+            <div class="header-content">
+                <div class="brand-row">
+                    <img src="/assets/logo/logo_icon.png" alt="College Logo" class="college-logo"
+                        onerror="this.style.display='none'">
+                    <div>
+                        <h1 class="college-name">MAA GOURI DEVI</h1>
+                        <div class="college-subtitle">COLLEGE OF EDUCATION</div>
+                    </div>
+                </div>
+                <div class="est-row">
+                    <span class="est-badge">
+                        <i class="bi bi-award-fill"></i>
+                        EST. 2015
+                    </span>
+                </div>
+            </div>
+            <div class="location-bar">
+                <i class="bi bi-geo-alt-fill"></i>
+                <span>Dasagram · Sabang · Paschim Medinipur · 721467</span>
+            </div>
+        </header>
+
+        <div class="institution-strip">
+            <span>Website: <a href="https://www.maagouridevicollege.com">maagouridevicollege.com</a></span>
+            <span>&nbsp; · &nbsp;Email: maagouridevicollege@gmail.com</span><br>
+            Recognised by NCTE · Affiliated to BSAEU and WBBPE
+        </div>
+
+        <section class="card-body-section">
+            <% let photoDoc=null; if (typeof documents !=='undefined' && documents.length> 0) {
+                photoDoc = documents.find(d => {
+                const type = (d.document_type || '').toLowerCase();
+                return type.includes('photo') || type.includes('picture') || type.includes('image');
+                }) || documents[0];
+                } %>
+
+                <div class="photo-wrap">
+                    <div class="student-photo-frame">
+                        <% if (photoDoc) { %>
+                            <img src="/admin/students/document/<%= photoDoc.id %>" alt="Student Photo">
+                            <% } else { %>
+                                <div class="no-photo"><i class="bi bi-person-fill" style="font-size:34px"></i></div>
+                                <% } %>
+                    </div>
+                </div>
+
+                <div class="student-name">
+                    <%= student.first_name %>
+                        <%= student.last_name %>
+                </div>
+                <span class="student-status-badge">
+                    <%= student.status %> Scholar
+                </span>
+
+                <div class="info-container">
+                    <div class="info-row"><span class="info-label">Admission No.</span><span
+                            class="info-value text-primary">
+                            <%= student.admission_no %>
+                        </span></div>
+                    <div class="info-row"><span class="info-label">Father's Name</span><span class="info-value">
+                            <%= student.father_name || 'N/A' %>
+                        </span></div>
+                    <div class="info-row"><span class="info-label">Course</span><span class="info-value">
+                            <%= student.Course ? student.Course.course_name : 'N/A' %>
+                        </span></div>
+                    <div class="info-row"><span class="info-label">Session</span><span class="info-value">
+                            <%= student.AcademicSession ? student.AcademicSession.session_name : 'N/A' %>
+                        </span></div>
+                    <div class="info-row"><span class="info-label">Mobile</span><span class="info-value">
+                            <%= student.mobile || 'N/A' %>
+                        </span></div>
+                </div>
+        </section>
+
+        <footer class="card-footer-banner">
+            <div class="issued">Issued: <%= new Date().getFullYear() %><br><span class="secure-id">SECURE ID</span>
+            </div>
+            <div class="signature-line">Principal Sign.</div>
+        </footer>
+    </main>
+</body>
+
+</html>

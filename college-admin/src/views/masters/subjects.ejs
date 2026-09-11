@@ -1,0 +1,326 @@
+<%- include('../partials/header') %>
+    <%- include('../partials/sidebar') %>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0">Subject Master</h4>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSubModal">
+                <i class="bi bi-plus-circle"></i> Add Subject
+            </button>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+
+                <!-- Real-Time Filters -->
+                <div class="row mb-4">
+                    <div class="col-md-4 mb-2">
+                        <input type="text" id="searchInput" class="form-control"
+                            placeholder="🔍 Search subjects, codes...">
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <select id="filterCourse" class="form-select"
+                            onchange="filterSemesterDropdown(); filterTable();">
+                            <option value="">All Courses</option>
+                            <% courses.forEach(c=> { %>
+                                <option value="<%= c.course_name %>" data-course-id="<%= c.id %>">
+                                    <%= c.course_name %>
+                                </option>
+                                <% }) %>
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <select id="filterSemester" class="form-select" onchange="filterTable()">
+                            <option value="">All Semesters</option>
+                            <% semesters.forEach(s=> { %>
+                                <option value="<%= s.semester_name %>" data-course="<%= s.course_id %>">
+                                    <%= s.semester_name %>
+                                </option>
+                                <% }) %>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle" id="subjectTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Course</th>
+                                <th>Semester</th>
+                                <th>Subject</th>
+                                <th>Max Marks</th>
+                                <th>Pass Marks</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% subjects.forEach(s=> { %>
+                                <tr>
+                                    <td>
+                                        <%= s.id %>
+                                    </td>
+                                    <td>
+                                        <%= s.Course.course_name %>
+                                    </td>
+                                    <td>
+                                        <%= s.Semester.semester_name %>
+                                    </td>
+                                    <td class="fw-bold">
+                                        <%= s.subject_code %> - <%= s.subject_name %>
+                                    </td>
+                                    <td>
+                                        <%= s.max_marks %>
+                                    </td>
+                                    <td>
+                                        <%= s.passing_marks %>
+                                    </td>
+                                    <td>
+                                        <span class="badge <%= s.is_active ? 'bg-success' : 'bg-danger' %>">
+                                            <%= s.is_active ? 'Active' : 'Inactive' %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <form action="/admin/subjects/<%= s.id %>/toggle" method="POST"
+                                            style="display:inline;">
+                                            <button type="submit"
+                                                class="btn btn-sm <%= s.is_active ? 'btn-outline-danger' : 'btn-outline-success' %>">
+                                                <%= s.is_active ? 'Deactivate' : 'Activate' %>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                                    <tr id="noResultsRow" style="display: none;">
+                                        <td colspan="8" class="text-center text-muted py-4">No subjects match your
+                                            filters.</td>
+                                    </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Subject Modal -->
+        <div class="modal fade" id="addSubModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form action="/admin/subjects" method="POST">
+                        <div class="modal-header">
+                            <h5 class="modal-title">New Subject</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Course</label>
+                                    <select name="course_id" id="modalCourseSelect" class="form-select" required
+                                        onchange="filterModalSemesters()">
+                                        <option value="">Select Course...</option>
+                                        <% courses.forEach(c=> { %>
+                                            <option value="<%= c.id %>">
+                                                <%= c.course_name %>
+                                            </option>
+                                            <% }) %>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Semester</label>
+                                    <select name="semester_id" id="modalSemesterSelect" class="form-select" required
+                                        disabled>
+                                        <option value="">Select Course First...</option>
+                                        <% semesters.forEach(s=> { %>
+                                            <option value="<%= s.id %>" data-course="<%= s.course_id %>">
+                                                <%= s.semester_name %>
+                                            </option>
+                                            <% }) %>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-8 mb-3">
+                                    <label class="form-label">Subject Name</label>
+                                    <input type="text" name="subject_name" class="form-control" required>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Subject Code</label>
+                                    <input type="text" name="subject_code" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Max Marks</label>
+                                    <input type="number" name="max_marks" class="form-control" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Passing Marks</label>
+                                    <input type="number" name="passing_marks" class="form-control" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer bg-light">
+                            <button type="submit" class="btn btn-primary">Save Subject</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // 1. Cascading Modal Semesters & Auto-Disable
+            function filterModalSemesters() {
+                const courseId = document.getElementById('modalCourseSelect').value;
+                const semSelect = document.getElementById('modalSemesterSelect');
+                const options = semSelect.querySelectorAll('option');
+
+                if (!courseId) {
+                    semSelect.disabled = true;
+                    semSelect.value = '';
+                    semSelect.querySelector('option').textContent = "Select Course First...";
+                    return;
+                }
+
+                semSelect.disabled = false;
+                semSelect.querySelector('option').textContent = "Select Semester...";
+                semSelect.value = '';
+
+                options.forEach(opt => {
+                    if (opt.value === "") return;
+                    if (opt.getAttribute('data-course') === courseId) {
+                        opt.style.display = 'block';
+                    } else {
+                        opt.style.display = 'none';
+                    }
+                });
+            }
+
+            // 2. Cascading Filter Semesters inside the Table Search UI
+            function filterTableSemesters() {
+                const courseName = document.getElementById('filterCourse').value.toLowerCase().trim();
+                const semSelect = document.getElementById('filterSemester');
+                const options = semSelect.querySelectorAll('option');
+
+                semSelect.value = ''; // Reset semester filter on course change
+
+                options.forEach(opt => {
+                    if (opt.value === "") return;
+                    // Find matching attribute or parse dynamically if needed
+                    const parentCourse = opt.getAttribute('data-course');
+                    // Alternatively, filter visibility based on selected course name row matches
+                    if (courseName === "") {
+                        opt.style.display = 'block';
+                    } else {
+                        // If you want to restrict the semester filter dropdown based on the selected course filter
+                        // We can cross-reference it or leave it standard. Let's trigger the table filter directly:
+                    }
+                });
+                filterTable();
+            }
+
+            // 3. Real-Time Table Filter Engine
+            document.addEventListener("DOMContentLoaded", () => {
+                const searchInput = document.getElementById("searchInput");
+                const filterCourse = document.getElementById("filterCourse");
+                const filterSemester = document.getElementById("filterSemester");
+                const tableRows = document.querySelectorAll("#subjectTable tbody tr:not(#noResultsRow)");
+                const noResultsRow = document.getElementById("noResultsRow");
+
+                function filterTable() {
+                    const query = searchInput.value.toLowerCase().trim();
+                    const course = filterCourse.value.toLowerCase().trim();
+                    const semester = filterSemester.value.toLowerCase().trim();
+                    let visibleCount = 0;
+
+                    tableRows.forEach(row => {
+                        const rowText = row.innerText.toLowerCase();
+                        const rowCourse = row.cells[1].innerText.toLowerCase().trim();
+                        const rowSemester = row.cells[2].innerText.toLowerCase().trim();
+
+                        const matchesSearch = query === "" || rowText.includes(query);
+                        const matchesCourse = course === "" || rowCourse === course;
+                        const matchesSemester = semester === "" || rowSemester === semester;
+
+                        if (matchesSearch && matchesCourse && matchesSemester) {
+                            row.style.display = "";
+                            visibleCount++;
+                        } else {
+                            row.style.display = "none";
+                        }
+                    });
+
+                    if (noResultsRow) {
+                        noResultsRow.style.display = visibleCount === 0 ? "" : "none";
+                    }
+                }
+
+                searchInput.addEventListener("keyup", filterTable);
+                filterCourse.addEventListener("change", filterTable);
+                filterSemester.addEventListener("change", filterTable);
+            });
+        </script>
+        <script>
+            // 1. Dynamically Filter Semester Dropdown based on Selected Course Filter
+            function filterSemesterDropdown() {
+                const courseSelect = document.getElementById('filterCourse');
+                const selectedOption = courseSelect.options[courseSelect.selectedIndex];
+                const courseId = selectedOption.getAttribute('data-course-id');
+
+                const semSelect = document.getElementById('filterSemester');
+                const semOptions = semSelect.querySelectorAll('option');
+
+                semSelect.value = ''; // Reset semester filter when course changes
+
+                semOptions.forEach(opt => {
+                    if (opt.value === "") return; // Keep "All Semesters" option
+
+                    const semCourseId = opt.getAttribute('data-course');
+                    if (!courseId || semCourseId === courseId) {
+                        opt.style.display = 'block';
+                    } else {
+                        opt.style.display = 'none';
+                    }
+                });
+            }
+
+            // 2. Real-Time Table Filter Engine
+            document.addEventListener("DOMContentLoaded", () => {
+                const searchInput = document.getElementById("searchInput");
+                const filterCourse = document.getElementById("filterCourse");
+                const filterSemester = document.getElementById("filterSemester");
+                const tableRows = document.querySelectorAll("#subjectTable tbody tr:not(#noResultsRow)");
+                const noResultsRow = document.getElementById("noResultsRow");
+
+                window.filterTable = function () {
+                    const query = searchInput.value.toLowerCase().trim();
+                    const course = filterCourse.value.toLowerCase().trim();
+                    const semester = filterSemester.value.toLowerCase().trim();
+                    let visibleCount = 0;
+
+                    tableRows.forEach(row => {
+                        const rowText = row.innerText.toLowerCase();
+                        const rowCourse = row.cells[1].innerText.toLowerCase().trim();
+                        const rowSemester = row.cells[2].innerText.toLowerCase().trim();
+
+                        const matchesSearch = query === "" || rowText.includes(query);
+                        const matchesCourse = course === "" || rowCourse === course;
+                        const matchesSemester = semester === "" || rowSemester === semester;
+
+                        if (matchesSearch && matchesCourse && matchesSemester) {
+                            row.style.display = "";
+                            visibleCount++;
+                        } else {
+                            row.style.display = "none";
+                        }
+                    });
+
+                    if (noResultsRow) {
+                        noResultsRow.style.display = visibleCount === 0 ? "" : "none";
+                    }
+                }
+
+                searchInput.addEventListener("keyup", filterTable);
+                filterSemester.addEventListener("change", filterTable);
+            });
+        </script>
+
+        <%- include('../partials/footer') %>

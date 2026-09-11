@@ -1,0 +1,62 @@
+<%- include('../partials/header') %>
+    <%- include('../partials/sidebar') %>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0">Fee Types Master</h4>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTypeModal">
+                <i class="bi bi-plus-circle"></i> Add Fee Type
+            </button>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Type Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (types.length===0) { %>
+                            <tr>
+                                <td class="text-center text-muted">No fee types defined yet.</td>
+                            </tr>
+                            <% } else { %>
+                                <% types.forEach(t=> { %>
+                                    <tr>
+                                        <td class="fw-bold text-primary">
+                                            <%= t.name %>
+                                        </td>
+                                    </tr>
+                                    <% }) %>
+                                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Add Fee Type Modal -->
+        <div class="modal fade" id="addTypeModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form action="/admin/fees/types" method="POST">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Add Fee Type</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label">Type Name</label>
+                                <input type="text" name="name" class="form-control"
+                                    placeholder="e.g., Tuition Fee, Admission Fee" required>
+                            </div>
+                        </div>
+                        <div class="modal-footer bg-light">
+                            <button type="submit" class="btn btn-primary">Save Fee Type</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <%- include('../partials/footer') %>

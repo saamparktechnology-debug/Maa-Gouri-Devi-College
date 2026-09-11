@@ -1,0 +1,111 @@
+<%- include('../../partials/header') %>
+    <%- include('../../partials/sidebar') %>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0">Staff Daily Attendance</h4>
+        </div>
+
+        <!-- Date Selector -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <form action="/admin/teachers/attendance/daily" method="GET" class="d-flex align-items-end gap-3 w-50">
+                    <div class="flex-grow-1">
+                        <label class="form-label">Attendance Date</label>
+                        <input type="date" name="date" class="form-control" value="<%= date %>" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Load Roster</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Attendance Matrix -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h6 class="mb-0 text-primary fw-bold">Marking for: <%= date %>
+                </h6>
+            </div>
+            <div class="card-body p-0">
+                <form action="/admin/teachers/attendance/daily" method="POST">
+                    <input type="hidden" name="date" value="<%= date %>">
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-3">ID</th>
+                                    <th>Teacher Name</th>
+                                    <th>Status (P / A / HD / PL)</th>
+                                    <th>Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% if (teachers.length===0) { %>
+                                    <tr>
+                                        <td colspan="4" class="text-center py-4 text-muted">No active teachers found.
+                                        </td>
+                                    </tr>
+                                    <% } %>
+                                        <% teachers.forEach(teacher=> { %>
+                                            <tr>
+                                                <td class="ps-3 text-muted">#<%= teacher.id %>
+                                                </td>
+                                                <td class="fw-bold">
+                                                    <%= teacher.name %>
+                                                </td>
+                                                <td>
+                                                    <!-- Secure hidden ID injection -->
+                                                    <input type="hidden"
+                                                        name="attendance[<%= teacher.id %>][teacher_id]"
+                                                        value="<%= teacher.id %>">
+
+                                                    <div class="btn-group" role="group">
+                                                        <input type="radio" class="btn-check"
+                                                            name="attendance[<%= teacher.id %>][status]"
+                                                            id="p_<%= teacher.id %>" value="Present"
+                                                            <%=(!teacher.currentStatus ||
+                                                            teacher.currentStatus==='Present' ) ? 'checked' : '' %>>
+                                                        <label class="btn btn-outline-success btn-sm fw-bold"
+                                                            for="p_<%= teacher.id %>">P</label>
+
+                                                        <input type="radio" class="btn-check"
+                                                            name="attendance[<%= teacher.id %>][status]"
+                                                            id="a_<%= teacher.id %>" value="Absent"
+                                                            <%=teacher.currentStatus==='Absent' ? 'checked' : '' %>>
+                                                        <label class="btn btn-outline-danger btn-sm fw-bold"
+                                                            for="a_<%= teacher.id %>">A</label>
+
+                                                        <input type="radio" class="btn-check"
+                                                            name="attendance[<%= teacher.id %>][status]"
+                                                            id="hd_<%= teacher.id %>" value="Half-Day"
+                                                            <%=teacher.currentStatus==='Half-Day' ? 'checked' : '' %>>
+                                                        <label class="btn btn-outline-info btn-sm fw-bold"
+                                                            for="hd_<%= teacher.id %>">HD</label>
+
+                                                        <input type="radio" class="btn-check"
+                                                            name="attendance[<%= teacher.id %>][status]"
+                                                            id="pl_<%= teacher.id %>" value="Paid Leave"
+                                                            <%=teacher.currentStatus==='Paid Leave' ? 'checked' : '' %>>
+                                                        <label class="btn btn-outline-warning btn-sm fw-bold"
+                                                            for="pl_<%= teacher.id %>">PL</label>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <input type="text" name="attendance[<%= teacher.id %>][remarks]"
+                                                        class="form-control form-control-sm"
+                                                        placeholder="Reason for leave..."
+                                                        value="<%= teacher.remarks || '' %>">
+                                                </td>
+                                            </tr>
+                                            <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="p-3 bg-light text-end">
+                        <button type="submit" class="btn btn-primary px-4"><i class="bi bi-save"></i> Save Staff
+                            Attendance</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <%- include('../../partials/footer') %>

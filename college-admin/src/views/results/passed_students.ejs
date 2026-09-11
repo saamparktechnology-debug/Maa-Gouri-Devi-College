@@ -1,0 +1,90 @@
+<%- include('../partials/header') %>
+    <%- include('../partials/sidebar') %>
+
+        <div class="mb-4">
+            <h4 class="mb-0">Eligible Passed Students</h4>
+            <small class="text-muted">Select a session and course to view students eligible for course completion
+                certificates.</small>
+        </div>
+
+        <!-- Filter Form -->
+        <div class="card border-0 shadow-sm mb-4 bg-light">
+            <div class="card-body">
+                <form action="/admin/results/passed-students" method="GET" class="row align-items-end">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold">Session *</label>
+                        <select name="session_id" class="form-select" required>
+                            <option value="">Select...</option>
+                            <% sessions.forEach(s=> { %>
+                                <option value="<%= s.id %>" <%=filters.session_id==s.id ? 'selected' : '' %>><%=
+                                        s.session_name %>
+                                </option>
+                                <% }) %>
+                        </select>
+                    </div>
+                    <div class="col-md-5 mb-3">
+                        <label class="form-label fw-bold">Course *</label>
+                        <select name="course_id" class="form-select" required>
+                            <option value="">Select...</option>
+                            <% courses.forEach(c=> { %>
+                                <option value="<%= c.id %>" <%=filters.course_id==c.id ? 'selected' : '' %>><%=
+                                        c.course_name %>
+                                </option>
+                                <% }) %>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search"></i> Filter
+                            Students</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Passed Students List -->
+        <% if (filters.session_id && filters.course_id) { %>
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Adm No.</th>
+                                <th>Student Name</th>
+                                <th>Registration No</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if(students.length===0) { %>
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-4">No fully graduated / passed
+                                        students found for this filter combination.</td>
+                                </tr>
+                                <% } %>
+                                    <% students.forEach(student=> { %>
+                                        <tr>
+                                            <td class="fw-bold">
+                                                <%= student.admission_no %>
+                                            </td>
+                                            <td>
+                                                <%= student.first_name %>
+                                                    <%= student.last_name %>
+                                            </td>
+                                            <td>
+                                                <%= student.registration_no || 'N/A' %>
+                                            </td>
+                                            <td class="text-end">
+                                                <a href="/admin/results/completion-certificate/<%= student.id %>"
+                                                    target="_blank" class="btn btn-sm btn-dark fw-bold">
+                                                    <i class="bi bi-award"></i> Issue Completion Certificate
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <% } %>
+
+                <%- include('../partials/footer') %>
