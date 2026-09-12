@@ -21,6 +21,7 @@ require("dotenv").config();
 const app = express();
 
 // Security Headers (Helmet) - Adjusted for Bootstrap/FontAwesome CDNs
+app.set("trust proxy", 1);
 app.use(
   helmet({
     contentSecurityPolicy: false,
