@@ -73,6 +73,7 @@ app.use("/admin", resultRoutes);
 app.use("/admin", accountRoutes);
 app.use("/admin", noticeRoutes);
 app.use("/admin", adminRoutes);
+app.use("/", attendanceRoutes);
 app.use((req, res, next) => {
   res.status(404).render("errors/404", {
     adminName: req.session ? req.session.adminName : "Admin",
