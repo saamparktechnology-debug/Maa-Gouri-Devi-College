@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fee Receipt - <%= payment.id %>
+    </title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: #dfe3e8;
+            font-family: "Times New Roman", Georgia, serif;
+            color: #172033;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .receipt-container {
+            width: 210mm;
+            min-height: 148mm;
+            /* A5 Landscape style or standard voucher size */
+            margin: 20px auto;
+            background: #fff;
+            padding: 15mm;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+            border: 1px solid #c9a45c;
+        }
+
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+            background: url('/admin/assets/icon.png') no-repeat center center;
+            background-size: contain;
+            opacity: 0.035;
+            pointer-events: none;
+        }
+
+        .header-border {
+            border-bottom: 2px solid #173b7a;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+
+            .receipt-container {
+                margin: 0;
+                box-shadow: none;
+                width: 100%;
+                border: none;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container text-center my-3 no-print">
+        <button onclick="window.print()" class="btn btn-primary px-4">
+            <i class="bi bi-printer me-2"></i> Print Receipt
+        </button>
+        <a href="/admin/fees/collection" class="btn btn-outline-secondary ms-2">Back to Fees</a>
+    </div>
+
+    <div class="receipt-container">
+        <div class="watermark"></div>
+
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center header-border">
+            <div class="d-flex align-items-center gap-3">
+                <img src="/admin/assets/icon.png" alt="Logo" style="width: 50px; height: 50px; object-fit: contain;">
+                <div class="text-start">
+                    <h4 class="m-0 fw-bold text-uppercase" style="color: #173b7a;">Maa Gouri Devi College</h4>
+                    <small class="text-muted">Office of Accounts & Financial Administration</small>
+                </div>
+            </div>
+            <div class="text-end">
+                <span class="badge bg-primary fs-6">FEE ACKNOWLEDGMENT</span>
+                <div class="small text-muted mt-1">Receipt No: <strong>#REC-<%= payment.id %></strong></div>
+            </div>
+        </div>
+
+        <!-- Student & Payment Info Grid -->
+        <table class="table table-bordered mb-4" style="font-size: 14px;">
+            <tr>
+                <th class="table-light" style="width: 20%;">Student Name</th>
+                <td style="width: 30%;"><strong>
+                        <%= payment.Student.first_name %>
+                            <%= payment.Student.last_name %>
+                    </strong></td>
+                <th class="table-light" style="width: 20%;">Admission No.</th>
+                <td style="width: 30%;"><strong>
+                        <%= payment.Student.admission_no %>
+                    </strong></td>
+            </tr>
+            <tr>
+                <th class="table-light">Course / Semester</th>
+                <td>
+                    <%= payment.Student.Course ? payment.Student.Course.course_name : 'N/A' %> (<%=
+                            payment.Student.Semester ? payment.Student.Semester.semester_name : 'N/A' %>)
+                </td>
+                <th class="table-light">Payment Date</th>
+                <td>
+                    <%= new Date(payment.payment_date || payment.created_at).toLocaleDateString() %>
+                </td>
+            </tr>
+            <tr>
+                <th class="table-light">Fee Head</th>
+                <td>
+                    <%= payment.FeeStructure ? payment.FeeStructure.fee_name : 'Tuition / Regular Fee' %>
+                </td>
+                <th class="table-light">Payment Mode</th>
+                <td>
+                    <%= payment.payment_mode || 'Cash' %>
+                        <%= payment.reference_no ? '(' + payment.reference_no + ')' : '' %>
+                </td>
+            </tr>
+        </table>
+
+        <!-- Amount Box -->
+        <div class="row align-items-center bg-light p-3 border mb-4">
+            <div class="col-8 text-start">
+                <span class="text-muted small text-uppercase fw-bold">Amount Paid (In Figures):</span>
+                <h3 class="m-0 text-success fw-bold">₹ <%= parseFloat(payment.amount_paid).toFixed(2) %>
+                </h3>
+            </div>
+            <div class="col-4 text-end">
+                <span class="badge bg-success p-2">STATUS: PAID</span>
+            </div>
+        </div>
+
+        <!-- Signatures -->
+        <div class="row mt-5 pt-4 text-center">
+            <div class="col-4">
+                <div style="border-top: 1px solid #333; padding-top: 5px;" class="small fw-bold">Student Signature</div>
+            </div>
+            <div class="col-4"></div>
+            <div class="col-4">
+                <div style="border-top: 1px solid #333; padding-top: 5px;" class="small fw-bold">Authorized Signatory
+                </div>
+                <div class="text-muted" style="font-size: 10px;">Accounts Department</div>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+
+</html>

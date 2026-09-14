@@ -38,7 +38,7 @@
                                                 <%= m.Course ? m.Course.course_name : 'N/A' %>
                                             </td>
                                             <td>
-                                                <%= m.Session ? m.Session.session_name : 'N/A' %>
+                                                <%= m.AcademicSession ? m.AcademicSession.session_name : 'N/A' %>
                                             </td>
                                             <td>
                                                 <%= m.Semester ? m.Semester.semester_name : 'N/A' %>
@@ -79,7 +79,8 @@
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Course *</label>
-                                <select name="course_id" class="form-select" required>
+                                <select name="course_id" id="uploadCourseSelect" class="form-select" required
+                                    onchange="filterModalSemesters()">
                                     <option value="">Select Course...</option>
                                     <% courses.forEach(c=> { %>
                                         <option value="<%= c.id %>">
@@ -101,17 +102,19 @@
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Semester *</label>
-                                <select name="semester_id" class="form-select" required>
-                                    <option value="">Select Semester...</option>
+                                <select name="semester_id" id="uploadSemesterSelect" class="form-select" required
+                                    disabled>
+                                    <option value="">First select a course...</option>
                                     <% semesters.forEach(sem=> { %>
-                                        <option value="<%= sem.id %>">
+                                        <option value="<%= sem.id %>" data-course="<%= sem.course_id %>"
+                                            style="display: none;">
                                             <%= sem.semester_name %>
                                         </option>
                                         <% }) %>
                                 </select>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">Consolidated PDF File * (Max 5MB)</label>
+                                <label class="form-label">Consolidated PDF File * (Max 15MB)</label>
                                 <input type="file" name="marksheet_pdf" class="form-control" accept=".pdf" required>
                             </div>
                         </div>
@@ -125,5 +128,36 @@
                 </div>
             </div>
         </div>
+
+        <script>
+            function filterModalSemesters() {
+                const courseId = document.getElementById('uploadCourseSelect').value;
+                const semSelect = document.getElementById('uploadSemesterSelect');
+                const options = semSelect.querySelectorAll('option');
+
+                semSelect.value = ''; // Reset selection
+
+                if (!courseId) {
+                    semSelect.disabled = true;
+                    semSelect.options[0].text = "First select a course...";
+                    options.forEach(opt => {
+                        if (opt.value !== "") opt.style.display = 'none';
+                    });
+                    return;
+                }
+
+                semSelect.disabled = false;
+                semSelect.options[0].text = "Select Semester...";
+
+                options.forEach(opt => {
+                    if (opt.value === "") return;
+                    if (opt.getAttribute('data-course') === courseId) {
+                        opt.style.display = 'block';
+                    } else {
+                        opt.style.display = 'none';
+                    }
+                });
+            }
+        </script>
 
         <%- include('../partials/footer') %>

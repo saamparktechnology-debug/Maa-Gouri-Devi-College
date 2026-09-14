@@ -131,6 +131,7 @@ AccountCategory.hasMany(AccountTransaction, { foreignKey: "category_id" });
 
 AccountTransaction.belongsTo(Admin, { foreignKey: "created_by" });
 
+// --- SESSION MARKSHEET RELATIONSHIPS ---
 SessionMarksheet.belongsTo(Session, { foreignKey: "session_id" });
 Session.hasMany(SessionMarksheet, {
   foreignKey: "session_id",

@@ -36,6 +36,10 @@
                                 <option value="Alumni" <%=student.status==='Alumni' ? 'selected' : '' %>>Alumni</option>
                             </select>
                         </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Roll Number</label>
+                            <input type="text" name="roll_no" class="form-control" value="<%= student.roll_no || '' %>">
+                        </div>
                     </div>
                     <div class="row">
                         <div class="col-md-4 mb-3">
@@ -43,8 +47,8 @@
                             <select name="session_id" class="form-select" required>
                                 <option value="">Select Session...</option>
                                 <% sessions.forEach(s=> { %>
-                                    <option value="<%= s.id %>" <%=student.session_id==s.id ? 'selected' : '' %>><%=
-                                            s.session_name %>
+                                    <option value="<%= s.id %>" <%=student.session_id==s.id ? 'selected' : '' %>>
+                                        <%= s.session_name %>
                                     </option>
                                     <% }) %>
                             </select>
@@ -55,8 +59,8 @@
                                 onchange="filterSemesters()">
                                 <option value="">Select Course...</option>
                                 <% courses.forEach(c=> { %>
-                                    <option value="<%= c.id %>" <%=student.course_id==c.id ? 'selected' : '' %>><%=
-                                            c.course_name %>
+                                    <option value="<%= c.id %>" <%=student.course_id==c.id ? 'selected' : '' %>>
+                                        <%= c.course_name %>
                                     </option>
                                     <% }) %>
                             </select>
@@ -67,7 +71,8 @@
                                 <option value="">Select Semester...</option>
                                 <% semesters.forEach(s=> { %>
                                     <option value="<%= s.id %>" data-course="<%= s.course_id %>"
-                                        <%=student.semester_id==s.id ? 'selected' : '' %>><%= s.semester_name %>
+                                        <%=student.semester_id==s.id ? 'selected' : '' %>>
+                                        <%= s.semester_name %>
                                     </option>
                                     <% }) %>
                             </select>
@@ -95,6 +100,18 @@
                         </div>
                     </div>
                     <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Father's Name</label>
+                            <input type="text" name="father_name" class="form-control"
+                                value="<%= student.father_name || '' %>">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Mother's Name</label>
+                            <input type="text" name="mother_name" class="form-control"
+                                value="<%= student.mother_name || '' %>">
+                        </div>
+                    </div>
+                    <div class="row">
                         <div class="col-md-3 mb-3">
                             <label class="form-label">Date of Birth *</label>
                             <input type="date" name="dob" class="form-control" value="<%= student.dob %>" required>
@@ -109,11 +126,11 @@
                         </div>
                         <div class="col-md-3 mb-3">
                             <label class="form-label">Mobile</label>
-                            <input type="text" name="mobile" class="form-control" value="<%= student.mobile %>">
+                            <input type="text" name="mobile" class="form-control" value="<%= student.mobile || '' %>">
                         </div>
                         <div class="col-md-3 mb-3">
                             <label class="form-label">Email</label>
-                            <input type="email" name="email" class="form-control" value="<%= student.email %>">
+                            <input type="email" name="email" class="form-control" value="<%= student.email || '' %>">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Aadhaar Card Number</label>
@@ -125,35 +142,107 @@
                     <div class="row">
                         <div class="col-md-12 mb-3">
                             <label class="form-label">Full Address</label>
-                            <input type="text" name="address" class="form-control" value="<%= student.address %>">
+                            <input type="text" name="address" class="form-control" value="<%= student.address || '' %>">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">City</label>
+                            <input type="text" name="city" class="form-control" value="<%= student.city || '' %>">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">State</label>
+                            <input type="text" name="state" class="form-control" value="<%= student.state || '' %>">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Pin Code</label>
+                            <input type="text" name="pincode" class="form-control" value="<%= student.pincode || '' %>">
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 3. Additional Document Uploads -->
+            <!-- 3. Dynamic Unlimited Documents & Photograph -->
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                    <span class="fw-bold text-primary"><i class="bi bi-file-earmark-arrow-up me-2"></i> Upload
-                        Additional Documents</span>
+                    <span class="fw-bold text-primary"><i class="bi bi-file-earmark-arrow-up me-2"></i> Documents &
+                        Photograph</span>
                     <button type="button" class="btn btn-sm btn-outline-primary fw-bold" onclick="addDocumentRow()">
                         <i class="bi bi-plus-circle"></i> Add More Document +
                     </button>
                 </div>
                 <div class="card-body">
                     <div id="documentContainer">
-                        <div class="row document-row mb-3 align-items-end">
+                        <!-- Photograph Update Row with Current Photo Preview on the Right -->
+                        <div class="row document-row mb-4 align-items-center bg-light p-3 rounded border">
                             <div class="col-md-5">
-                                <label class="form-label small text-muted">Document Type / Title</label>
-                                <input type="text" name="document_types[]" class="form-control"
-                                    placeholder="e.g., Transfer Certificate">
+                                <label class="form-label small text-muted fw-bold">Document Type / Title *</label>
+                                <input type="text" name="document_types[]" class="form-control" value="Photograph"
+                                    readonly>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label small text-muted">Select File</label>
-                                <input type="file" name="documents" class="form-control" accept=".jpg,.jpeg,.png,.pdf">
+                            <div class="col-md-5">
+                                <label class="form-label small text-muted fw-bold">Update Student Photograph</label>
+                                <input type="file" name="photograph" class="form-control" accept=".jpg,.jpeg,.png">
+                                <small class="text-muted" style="font-size: 11px;">Leave blank to keep current
+                                    photo</small>
                             </div>
-                            <div class="col-md-1 text-end"></div>
+                            <div class="col-md-2 text-center">
+                                <label class="form-label small text-muted fw-bold d-block">Current Photo</label>
+                                <% let photoDoc=documents ? documents.find(d=> (d.document_type ||
+                                    '').toLowerCase().includes('photo')) : null;
+                                    %>
+                                    <% if (photoDoc) { %>
+                                        <a href="/admin/students/document/<%= photoDoc.id %>" target="_blank"
+                                            title="Click to view full size">
+                                            <img src="/admin/students/document/<%= photoDoc.id %>" alt="Current Photo"
+                                                class="rounded border shadow-sm"
+                                                style="width: 55px; height: 65px; object-fit: cover;">
+                                        </a>
+                                        <% } else { %>
+                                            <span class="text-muted small">No Photo</span>
+                                            <% } %>
+                            </div>
                         </div>
+
+                        <!-- Existing Uploaded Documents List with Delete Checkboxes -->
+                        <% if (documents && documents.length> 0) { %>
+                            <label class="form-label small text-muted fw-bold">Existing Documents (Check box to
+                                delete)</label>
+                            <% documents.forEach(doc=> { %>
+                                <% if (!doc.document_type.toLowerCase().includes('photo')) { %>
+                                    <div class="row mb-2 align-items-center bg-white border p-2 rounded">
+                                        <div class="col-md-6">
+                                            <span class="fw-semibold">
+                                                <%= doc.document_type %>
+                                            </span>:
+                                            <a href="/admin/students/document/<%= doc.id %>" target="_blank"
+                                                class="text-decoration-none">View File</a>
+                                        </div>
+                                        <div class="col-md-6 text-end">
+                                            <div class="form-check form-check-inline text-danger mb-0">
+                                                <input class="form-check-input" type="checkbox"
+                                                    name="delete_documents[]" value="<%= doc.id %>"
+                                                    id="del_<%= doc.id %>">
+                                                <label class="form-check-label small fw-bold"
+                                                    for="del_<%= doc.id %>">Delete this file</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <% } %>
+                                        <% }) %>
+                                            <hr class="text-muted my-3">
+                                            <% } %>
+
+                                                <!-- New Additional Document Row -->
+                                                <div class="row document-row mb-3 align-items-end">
+                                                    <div class="col-md-5">
+                                                        <input type="text" name="document_types[]" class="form-control"
+                                                            placeholder="e.g., ID Proof, 10th Certificate">
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <input type="file" name="documents" class="form-control"
+                                                            accept=".jpg,.jpeg,.png,.pdf">
+                                                    </div>
+                                                    <div class="col-md-1 text-end"></div>
+                                                </div>
                     </div>
                 </div>
             </div>

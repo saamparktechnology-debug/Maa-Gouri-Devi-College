@@ -1,0 +1,193 @@
+<%- include('../partials/header') %>
+    <%- include('../partials/sidebar') %>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0">Student Financial Records</h4>
+        </div>
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <!-- Filter Bar -->
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <input type="text" id="searchInput" class="form-control"
+                            placeholder="🔍 Search Adm No, Name...">
+                    </div>
+                    <div class="col-md-3">
+                        <select id="filterCourse" class="form-select" onchange="filterSemestersDropdown()">
+                            <option value="">All Courses</option>
+                            <% courses.forEach(c=> { %>
+                                <option value="<%= c.course_name.toLowerCase() %>" data-id="<%= c.id %>">
+                                    <%= c.course_name %>
+                                </option>
+                                <% }) %>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select id="filterSemester" class="form-select">
+                            <option value="">All Semesters</option>
+                            <% semesters.forEach(sem=> { %>
+                                <option value="<%= sem.semester_name.toLowerCase() %>"
+                                    data-course="<%= sem.course_id %>">
+                                    <%= sem.semester_name %>
+                                </option>
+                                <% }) %>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select id="filterSession" class="form-select">
+                            <option value="">All Sessions</option>
+                            <% sessions.forEach(s=> { %>
+                                <option value="<%= s.session_name.toLowerCase() %>">
+                                    <%= s.session_name %>
+                                </option>
+                                <% }) %>
+                        </select>
+                    </div>
+                    <div class="col-md-1">
+                        <button type="button" class="btn btn-outline-secondary w-100" onclick="resetFilters()"
+                            title="Reset Filters">
+                            <i class="bi bi-arrow-counterclockwise"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" id="studentTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">Adm No.</th>
+                                <th>Student Name</th>
+                                <th>Course</th>
+                                <th>Semester</th>
+                                <th>Session</th>
+                                <th>Status</th>
+                                <th class="text-end pe-3">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (students.length===0) { %>
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted py-4">No students found.</td>
+                                </tr>
+                                <% } else { %>
+                                    <% students.forEach(s=> { %>
+                                        <tr>
+                                            <td class="ps-3 fw-bold text-primary">
+                                                <%= s.admission_no %>
+                                            </td>
+                                            <td>
+                                                <%= s.first_name %>
+                                                    <%= s.last_name %>
+                                            </td>
+                                            <td>
+                                                <%= s.Course ? s.Course.course_name : 'N/A' %>
+                                            </td>
+                                            <td>
+                                                <%= s.Semester ? s.Semester.semester_name : 'N/A' %>
+                                            </td>
+                                            <td>
+                                                <%= s.AcademicSession ? s.AcademicSession.session_name : 'N/A' %>
+                                            </td>
+                                            <td>
+                                                <span
+                                                    class="badge <%= s.status === 'Active' ? 'bg-success' : 'bg-secondary' %>">
+                                                    <%= s.status %>
+                                                </span>
+                                            </td>
+                                            <td class="text-end pe-3">
+                                                <a href="/admin/finance/student-payments/<%= s.id %>"
+                                                    class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-wallet me-1"></i> View Record
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        <% }) %>
+                                            <% } %>
+                                                <tr id="noResultsRow" style="display: none;">
+                                                    <td colspan="7" class="text-center text-muted py-4">No matching
+                                                        student records found.</td>
+                                                </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function filterSemestersDropdown() {
+                const courseSelect = document.getElementById('filterCourse');
+                const selectedOption = courseSelect.options[courseSelect.selectedIndex];
+                const courseId = selectedOption.getAttribute('data-id');
+                const semSelect = document.getElementById('filterSemester');
+                const options = semSelect.querySelectorAll('option');
+
+                semSelect.value = '';
+                options.forEach(opt => {
+                    if (opt.value === "") return;
+                    if (!courseId || opt.getAttribute('data-course') === courseId) {
+                        opt.style.display = 'block';
+                    } else {
+                        opt.style.display = 'none';
+                    }
+                });
+                filterTable();
+            }
+
+            function resetFilters() {
+                document.getElementById('searchInput').value = '';
+                document.getElementById('filterCourse').value = '';
+                document.getElementById('filterSemester').value = '';
+                document.getElementById('filterSession').value = '';
+                filterSemestersDropdown();
+            }
+
+            function filterTable() {
+                const query = document.getElementById('searchInput').value.toLowerCase().trim();
+                const course = document.getElementById('filterCourse').value.toLowerCase().trim();
+                const semester = document.getElementById('filterSemester').value.toLowerCase().trim();
+                const session = document.getElementById('filterSession').value.toLowerCase().trim();
+
+                const rows = document.querySelectorAll("#studentTable tbody tr:not(#noResultsRow)");
+                const noResultsRow = document.getElementById("noResultsRow");
+                let visibleCount = 0;
+
+                rows.forEach(row => {
+                    if (row.cells.length < 7) return;
+
+                    const rowText = row.innerText.toLowerCase();
+                    const rowCourse = row.cells[2].innerText.toLowerCase().trim();
+                    const rowSemester = row.cells[3].innerText.toLowerCase().trim();
+                    const rowSession = row.cells[4].innerText.toLowerCase().trim();
+
+                    const matchesSearch = query === "" || rowText.includes(query);
+                    const matchesCourse = course === "" || rowCourse === course;
+                    const matchesSemester = semester === "" || rowSemester === semester;
+                    const matchesSession = session === "" || rowSession === session;
+
+                    if (matchesSearch && matchesCourse && matchesSemester && matchesSession) {
+                        row.style.display = "";
+                        visibleCount++;
+                    } else {
+                        row.style.display = "none";
+                    }
+                });
+
+                if (noResultsRow) {
+                    noResultsRow.style.display = visibleCount === 0 ? "" : "none";
+                }
+            }
+
+            document.addEventListener("DOMContentLoaded", () => {
+                document.getElementById("searchInput").addEventListener("keyup", filterTable);
+                document.getElementById("filterCourse").addEventListener("change", filterTable);
+                document.getElementById("filterSemester").addEventListener("change", filterTable);
+                document.getElementById("filterSession").addEventListener("change", filterTable);
+            });
+        </script>
+
+        <%- include('../partials/footer') %>

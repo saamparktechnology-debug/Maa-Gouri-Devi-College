@@ -4,9 +4,14 @@ const path = require("path");
 exports.getMarksheets = async (req, res) => {
   try {
     const marksheets = await SessionMarksheet.findAll({
-      include: [Course, Session, Semester],
+      include: [
+        Course,
+        { model: Session, as: "AcademicSession" }, // Explicitly map the AcademicSession model alias
+        Semester,
+      ],
       order: [["uploaded_at", "DESC"]],
     });
+
     const sessions = await Session.findAll({ where: { is_active: true } });
     const courses = await Course.findAll({ where: { is_active: true } });
     const semesters = await Semester.findAll({ where: { is_active: true } });
@@ -19,7 +24,7 @@ exports.getMarksheets = async (req, res) => {
       adminName: req.session.adminName,
     });
   } catch (error) {
-    console.error(error);
+    console.error("Get Marksheets Error:", error);
     res.status(500).send("Server Error");
   }
 };
@@ -42,7 +47,7 @@ exports.uploadMarksheet = async (req, res) => {
 
     res.redirect("/admin/marksheets");
   } catch (error) {
-    console.error(error);
+    console.error("Upload Marksheet Error:", error);
     res.status(500).send("Error uploading marksheet PDF: " + error.message);
   }
 };
@@ -59,6 +64,7 @@ exports.viewMarksheetFile = async (req, res) => {
     );
     res.sendFile(safePath);
   } catch (error) {
+    console.error("View Marksheet Error:", error);
     res.status(500).send("Error accessing file");
   }
 };

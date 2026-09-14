@@ -6,6 +6,7 @@ const {
   Semester,
 } = require("../models");
 const path = require("path");
+const fs = require("fs");
 
 exports.getStudents = async (req, res) => {
   try {
@@ -123,18 +124,25 @@ exports.getEditStudentForm = async (req, res) => {
     const student = await Student.findByPk(req.params.id);
     if (!student) return res.status(404).send("Student not found");
 
+    // Fetch documents associated with this student so the edit view can render them
+    const documents = await StudentDocument.findAll({
+      where: { student_id: student.id },
+    });
+
     const sessions = await Session.findAll({ where: { is_active: true } });
     const courses = await Course.findAll({ where: { is_active: true } });
     const semesters = await Semester.findAll({ where: { is_active: true } });
 
     res.render("students/edit", {
       student,
+      documents, // <--- Passing the documents array here solves the ReferenceError
       sessions,
       courses,
       semesters,
       adminName: req.session.adminName,
     });
   } catch (error) {
+    console.error("Get Edit Form Error:", error);
     res.status(500).send("Server Error");
   }
 };
@@ -148,14 +156,69 @@ exports.updateStudent = async (req, res) => {
     // 1. Update basic student information
     await student.update(req.body);
 
-    // 2. Handle any newly uploaded documents during edit
-    if (req.files && req.files.length > 0) {
-      const docTypes = req.body.document_types || [];
+    // 2. Handle Photograph Replacement (Auto-delete old photograph if a new one is uploaded)
+    const newPhoto = req.files
+      ? req.files.find((file) => file.fieldname === "photograph")
+      : null;
+    if (newPhoto) {
+      const oldPhotoDoc = await StudentDocument.findOne({
+        where: { student_id: student.id, document_type: "Photograph" },
+      });
 
-      const documentPromises = req.files.map((file, index) => {
-        const customTitle = docTypes[index] || file.fieldname || "Document";
+      if (oldPhotoDoc) {
+        const oldFilePath = path.resolve(
+          __dirname,
+          "../../storage/documents",
+          oldPhotoDoc.file_path,
+        );
+        if (fs.existsSync(oldFilePath)) fs.unlinkSync(oldFilePath);
+        await oldPhotoDoc.destroy();
+      }
 
-        return StudentDocument.create({
+      await StudentDocument.create({
+        student_id: student.id,
+        document_type: "Photograph",
+        file_name: newPhoto.originalname,
+        file_path: newPhoto.filename,
+        mime_type: newPhoto.mimetype,
+      });
+    }
+
+    // 3. Handle Deletion of Selected Existing Documents (Safely checked with optional chaining)
+    const deleteDocs = req.body?.delete_documents;
+    if (deleteDocs) {
+      const docIdsToDelete = Array.isArray(deleteDocs)
+        ? deleteDocs
+        : [deleteDocs];
+
+      for (let docId of docIdsToDelete) {
+        const docRecord = await StudentDocument.findOne({
+          where: { id: docId, student_id: student.id },
+        });
+        if (docRecord) {
+          const filePath = path.resolve(
+            __dirname,
+            "../../storage/documents",
+            docRecord.file_path,
+          );
+          if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+          await docRecord.destroy();
+        }
+      }
+    }
+
+    // 4. Handle Newly Uploaded Additional Documents
+    const additionalFiles = req.files
+      ? req.files.filter((file) => file.fieldname === "documents")
+      : [];
+    if (additionalFiles.length > 0) {
+      const docTypes = req.body?.document_types || [];
+
+      additionalFiles.forEach((file, index) => {
+        const customTitle =
+          docTypes[index + 1] || docTypes[index] || "Additional Document";
+
+        StudentDocument.create({
           student_id: student.id,
           document_type: customTitle,
           file_name: file.originalname,
@@ -163,7 +226,6 @@ exports.updateStudent = async (req, res) => {
           mime_type: file.mimetype,
         });
       });
-      await Promise.all(documentPromises);
     }
 
     res.redirect(`/admin/students/${req.params.id}`);

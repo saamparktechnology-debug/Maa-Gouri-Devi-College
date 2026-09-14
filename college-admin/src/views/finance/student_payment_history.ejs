@@ -1,0 +1,70 @@
+<%- include('../partials/header') %>
+    <%- include('../partials/sidebar') %>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="mb-0">Payment Ledger: <%= student.first_name %>
+                        <%= student.last_name %>
+                </h4>
+                <small class="text-muted">Admission No: <%= student.admission_no %> | Course: <%= student.Course ?
+                            student.Course.course_name : 'N/A' %></small>
+            </div>
+            <a href="/admin/finance/student-payments" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Directory
+            </a>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Receipt ID</th>
+                                <th>Fee Head</th>
+                                <th>Payment Date</th>
+                                <th>Mode</th>
+                                <th>Amount Paid</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (payments.length===0) { %>
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted py-4">No payment transactions recorded
+                                        for this student.</td>
+                                </tr>
+                                <% } else { %>
+                                    <% payments.forEach(p=> { %>
+                                        <tr>
+                                            <td class="fw-bold text-primary">#REC-<%= p.id %>
+                                            </td>
+                                            <td>
+                                                <%= p.FeeStructure ? p.FeeStructure.fee_name : 'Tuition / Regular Fee'
+                                                    %>
+                                            </td>
+                                            <td>
+                                                <%= new Date(p.payment_date || p.created_at).toLocaleDateString() %>
+                                            </td>
+                                            <td>
+                                                <%= p.payment_mode || 'Cash' %>
+                                            </td>
+                                            <td class="fw-bold text-success">₹ <%= parseFloat(p.amount_paid).toFixed(2)
+                                                    %>
+                                            </td>
+                                            <td class="text-end">
+                                                <a href="/admin/finance/receipt/<%= p.id %>" target="_blank"
+                                                    class="btn btn-sm btn-primary">
+                                                    <i class="bi bi-file-earmark-pdf me-1"></i> Receipt
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        <% }) %>
+                                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <%- include('../partials/footer') %>

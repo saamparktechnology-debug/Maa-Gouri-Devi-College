@@ -16,6 +16,7 @@ const resultRoutes = require("./routes/resultRoutes");
 const accountRoutes = require("./routes/accountRoutes");
 const noticeRoutes = require("./routes/noticeRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+const financeRoutes = require("./routes/financeRoutes");
 require("dotenv").config();
 
 const app = express();
@@ -73,6 +74,7 @@ app.use("/admin", resultRoutes);
 app.use("/admin", accountRoutes);
 app.use("/admin", noticeRoutes);
 app.use("/admin", adminRoutes);
+app.use("/admin", financeRoutes);
 app.use("/", attendanceRoutes);
 app.use((req, res, next) => {
   res.status(404).render("errors/404", {
