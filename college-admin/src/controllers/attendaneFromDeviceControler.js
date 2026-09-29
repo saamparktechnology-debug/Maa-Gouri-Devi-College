@@ -1,216 +1,118 @@
 const { Student, Attendance } = require("../models");
 
-// ============================================================
-// ZKTeco / C121TA ADMS
-//
-// GET  /iclock/cdata     -> device handshake
-// POST /iclock/cdata     -> attendance data
-// ============================================================
-
+// Handle ADMS Push data sent by Realtime C121TA device
 exports.handleADMSData = async (req, res) => {
   try {
-    const { SN, table, Stamp, options, pushver } = req.query;
+    console.log("");
+    console.log("==============================================");
+    console.log("=== BIOMETRIC ATTENDANCE REQUEST RECEIVED ===");
+    console.log("==============================================");
+    console.log("Method:", req.method);
+    console.log("Path:", req.path);
+    console.log("Query:", req.query);
+    console.log("Headers:", req.headers);
+    console.log("Raw Body:", req.body);
 
-    console.log("\n========================================");
-    console.log("C121TA REQUEST");
-    console.log("Method :", req.method);
-    console.log("Path   :", req.path);
-    console.log("SN     :", SN);
-    console.log("Table  :", table);
-    console.log("Stamp  :", Stamp);
-    console.log("Options:", options);
-    console.log("PushVer:", pushver);
-    console.log("========================================");
+    const queryParams = req.query;
+    const rawBody = req.body;
 
-    // ==========================================================
-    // DEVICE HANDSHAKE
-    // ==========================================================
-
-    if (req.method === "GET") {
-      const response = [
-        `GET OPTION FROM: ${SN || ""}`,
-        "Stamp=9999",
-        "ATTLOGSTAMP=0",
-        "OPERLOGStamp=0",
-        "ATTPHOTOStamp=0",
-        "ErrorDelay=30",
-        "Delay=10",
-        "TransTimes=00:00;23:59",
-        "TransInterval=1",
-        "TransFlag=TransData AttLog OpLog EnrollUser ChgUser EnrollFP ChgFP FPImag",
-        "TimeZone=5.5",
-        "Realtime=1",
-        "Encrypt=None",
-      ].join("\n");
-
-      console.log("Sending C121TA handshake:");
-      console.log(response);
-
-      return res.status(200).type("text/plain").send(response);
+    if (req.path.includes("/ping") || queryParams.option === "check") {
+      console.log(">>> Device ping/check request");
+      return res.send("OK");
     }
 
-    // ==========================================================
-    // POST DATA
-    // ==========================================================
-
-    const rawBody =
-      typeof req.body === "string"
-        ? req.body
-        : req.body
-          ? JSON.stringify(req.body)
-          : "";
-
-    console.log("RAW BODY:");
-    console.log(rawBody);
-
-    if (!rawBody.trim()) {
-      console.log("Empty body received");
-      return res.status(200).type("text/plain").send("OK: 0");
+    if (!rawBody || typeof rawBody !== "string") {
+      console.log(">>> NO TEXT BODY RECEIVED");
+      console.log(">>> Returning OK:0");
+      return res.send("OK:0");
     }
 
-    // ==========================================================
-    // ATTLOG / RTLOG
-    // ==========================================================
+    const lines = rawBody.split(/\r?\n/);
 
-    const normalizedTable = (table || "ATTLOG").toUpperCase();
+    console.log(">>> Total lines received:", lines.length);
 
-    if (normalizedTable === "ATTLOG" || normalizedTable === "RTLOG") {
-      const lines = rawBody
-        .split(/\r?\n/)
-        .map((line) => line.trim())
-        .filter(Boolean);
+    for (const line of lines) {
+      if (!line.trim()) continue;
 
-      let savedCount = 0;
-      let duplicateCount = 0;
-      let unknownStudentCount = 0;
+      console.log("");
+      console.log("---------- ATTENDANCE RECORD ----------");
+      console.log("Raw line:", JSON.stringify(line));
 
-      for (const line of lines) {
-        console.log("\nATTENDANCE LINE:");
-        console.log(line);
+      const parts = line.split("\t");
 
-        // ------------------------------------------------------
-        // C121TA standard format:
-        //
-        // PIN    TIME                  STATUS VERIFY WORKCODE
-        //
-        // Example:
-        // 1001   2026-09-29 09:15:22   0      1      0
-        //
-        // Usually fields are TAB separated.
-        // ------------------------------------------------------
+      console.log("Parsed parts:", parts);
 
-        let parts = line.split(/\t+/);
+      const enrollId = parts[0]?.trim();
+      const punchTime = parts[1]?.trim();
 
-        // Some devices/requests may contain multiple spaces
-        // instead of tabs.
-        if (parts.length < 2) {
-          parts = line.split(/\s{2,}/);
-        }
+      console.log("Enroll ID:", enrollId);
+      console.log("Punch Time:", punchTime);
 
-        const enrollId = parts[0]?.trim();
-        const punchTime = parts[1]?.trim();
-        const status = parts[2]?.trim();
-        const verifyMode = parts[3]?.trim();
-        const workCode = parts[4]?.trim();
-
-        console.log("PARSED:");
-        console.log({
-          enrollId,
-          punchTime,
-          status,
-          verifyMode,
-          workCode,
-        });
-
-        if (!enrollId || !punchTime) {
-          console.log("INVALID ATTENDANCE LINE");
-          continue;
-        }
-
-        // ------------------------------------------------------
-        // Find student
-        // ------------------------------------------------------
-
-        const student = await Student.findOne({
-          where: {
-            admission_no: enrollId,
-          },
-        });
-
-        if (!student) {
-          console.log(`STUDENT NOT FOUND: admission_no=${enrollId}`);
-
-          unknownStudentCount++;
-          continue;
-        }
-
-        console.log(
-          `STUDENT FOUND: ID=${student.id}, admission_no=${student.admission_no}`,
-        );
-
-        // ------------------------------------------------------
-        // Date
-        // ------------------------------------------------------
-
-        const punchDate = punchTime.substring(0, 10);
-
-        // ------------------------------------------------------
-        // Prevent duplicate attendance
-        // ------------------------------------------------------
-
-        const existingAttendance = await Attendance.findOne({
-          where: {
-            student_id: student.id,
-            attendance_date: punchDate,
-          },
-        });
-
-        if (existingAttendance) {
-          console.log(`DUPLICATE ATTENDANCE: ${enrollId} ${punchDate}`);
-
-          duplicateCount++;
-          continue;
-        }
-
-        // ------------------------------------------------------
-        // Save attendance
-        // ------------------------------------------------------
-
-        await Attendance.create({
-          student_id: student.id,
-          admission_no: student.admission_no,
-          attendance_date: punchDate,
-          check_in_time: punchTime,
-          status: "Present",
-          source: "Biometric - C121TA",
-        });
-
-        console.log(`ATTENDANCE SAVED: ${enrollId} - ${punchTime}`);
-
-        savedCount++;
+      if (!enrollId || !punchTime) {
+        console.log(">>> INVALID RECORD: missing enroll ID or punch time");
+        continue;
       }
 
-      console.log("\n========================================");
-      console.log("C121TA PROCESSING RESULT");
-      console.log("Saved:", savedCount);
-      console.log("Duplicates:", duplicateCount);
-      console.log("Unknown students:", unknownStudentCount);
-      console.log("========================================\n");
+      console.log(">>> Looking for student with admission_no:", enrollId);
 
-      // Tell device how many records were processed.
-      return res.status(200).type("text/plain").send(`OK: ${savedCount}`);
+      const student = await Student.findOne({
+        where: { admission_no: enrollId },
+      });
+
+      if (!student) {
+        console.log(">>> STUDENT NOT FOUND:", enrollId);
+        continue;
+      }
+
+      console.log(
+        ">>> STUDENT FOUND:",
+        JSON.stringify(student.toJSON())
+      );
+
+      const punchDate = punchTime.split(" ")[0];
+
+      console.log(">>> Punch date:", punchDate);
+
+      const existingAttendance = await Attendance.findOne({
+        where: {
+          student_id: student.id,
+          date: punchDate,
+        },
+      });
+
+      if (existingAttendance) {
+        console.log(
+          ">>> ATTENDANCE ALREADY EXISTS:",
+          JSON.stringify(existingAttendance.toJSON())
+        );
+        continue;
+      }
+
+      console.log(">>> Creating attendance...");
+
+      const attendance = await Attendance.create({
+        student_id: student.id,
+        date: punchDate,
+        status: "PRESENT",
+      });
+
+      console.log(
+        ">>> ATTENDANCE CREATED:",
+        JSON.stringify(attendance.toJSON())
+      );
     }
 
-    // ==========================================================
-    // OTHER ADMS DATA
-    // ==========================================================
+    console.log("");
+    console.log(">>> Finished processing biometric request");
+    console.log("==============================================");
 
-    console.log(`Unhandled C121TA table: ${table}`);
-
-    return res.status(200).type("text/plain").send("OK: 0");
+    return res.send("OK:0");
   } catch (error) {
-    console.error("C121TA PROCESSING ERROR:", error);
+    console.error("==============================================");
+    console.error("!!! BIOMETRIC PROCESSING ERROR !!!");
+    console.error(error);
+    console.error("==============================================");
 
-    return res.status(500).type("text/plain").send("ERROR");
+    return res.status(500).send("ERROR");
   }
 };
