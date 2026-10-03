@@ -17,6 +17,7 @@ const accountRoutes = require("./routes/accountRoutes");
 const noticeRoutes = require("./routes/noticeRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const financeRoutes = require("./routes/financeRoutes");
+const deviceAttendanceRoutes = require("./routes/deviceAttendanceRoutes");
 require("dotenv").config();
 
 const app = express();
@@ -44,13 +45,24 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
 // Session Management
-const sessionStore = new SequelizeStore({ db: sequelize });
+
+if (!process.env.SESSION_SECRET) {
+  throw new Error(
+    "SESSION_SECRET is missing. Add SESSION_SECRET to your .env file.",
+  );
+}
+
+const sessionStore = new SequelizeStore({
+  db: sequelize,
+});
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     store: sessionStore,
+
     cookie: {
       secure: process.env.NODE_ENV === "production",
       httpOnly: true,
@@ -75,7 +87,7 @@ app.use("/admin", accountRoutes);
 app.use("/admin", noticeRoutes);
 app.use("/admin", adminRoutes);
 app.use("/admin", financeRoutes);
-app.use("/", attendanceRoutes);
+app.use("/", deviceAttendanceRoutes);
 app.use((req, res, next) => {
   res.status(404).render("errors/404", {
     adminName: req.session ? req.session.adminName : "Admin",
